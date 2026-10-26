@@ -1,0 +1,51 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Resale</p>
+  <h1>My Orders</h1>
+  <p class="lede">Track orders you placed and sales you are fulfilling. ReWear demo orders do not charge payment.</p>
+</div>
+
+<div class="wrap">
+  <div class="dash-grid">
+    <section class="panel">
+      <div class="panel-head"><h2 style="font-size:1.2rem">Orders I placed</h2></div>
+      <% if (bought.length) { %>
+        <% bought.forEach((order) => { %>
+          <div class="mini">
+            <img src="<%= itemImage(order) %>" alt="">
+            <div>
+              <a class="t" href="/orders/<%= order.id %>"><%= order.title %></a>
+              <div class="s">Order #<%= order.id %> · <%= money(order.sale_price) %> · Seller: <%= order.seller_name %></div>
+            </div>
+            <span class="badge status status-<%= order.status %>"><%= order.status %></span>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p class="muted">You have not placed any resale orders.</p>
+        <a class="btn btn-quiet btn-sm" href="/resale">Browse resale</a>
+      <% } %>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2 style="font-size:1.2rem">Sales to fulfil</h2></div>
+      <% if (sold.length) { %>
+        <% sold.forEach((order) => { %>
+          <div class="mini">
+            <img src="<%= itemImage(order) %>" alt="">
+            <div>
+              <a class="t" href="/orders/<%= order.id %>"><%= order.title %></a>
+              <div class="s">Order #<%= order.id %> · <%= money(order.sale_price) %> · Buyer: <%= order.buyer_name %></div>
+            </div>
+            <span class="badge status status-<%= order.status %>"><%= order.status %></span>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p class="muted">No one has ordered your resale listings yet.</p>
+        <a class="btn btn-quiet btn-sm" href="/my-listings">Manage listings</a>
+      <% } %>
+    </section>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

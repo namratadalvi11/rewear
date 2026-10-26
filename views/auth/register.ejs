@@ -1,0 +1,68 @@
+<%- include('/partials/head') %>
+
+<div class="wrap wrap-narrow page-head">
+  <p class="eyebrow">Join the community</p>
+  <h1>Create your ReWear account</h1>
+  <p class="lede">One account to rent, resell and donate clothes within your local community.</p>
+</div>
+
+<div class="wrap wrap-narrow">
+  <div class="panel">
+    <% if (errors.length) { %>
+      <div class="errors" role="alert">
+        <ul><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul>
+      </div>
+    <% } %>
+
+    <form method="post" action="/register" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="field">
+        <label for="name">Full name</label>
+        <input type="text" id="name" name="name" value="<%= form.name || '' %>" required autocomplete="name">
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" value="<%= form.email || '' %>" required autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="phone">Phone number</label>
+          <input type="tel" id="phone" name="phone" value="<%= form.phone || '' %>" required autocomplete="tel">
+          <p class="hint">Kept private. Shared only with the other member once a booking is confirmed.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password">
+          <p class="hint">At least 8 characters.</p>
+        </div>
+        <div class="field">
+          <label for="confirm">Confirm password</label>
+          <input type="password" id="confirm" name="confirm" required minlength="8" autocomplete="new-password">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="location">Locality / community</label>
+          <input type="text" id="location" name="location" value="<%= form.location || '' %>"
+                 required placeholder="e.g. Kothrud, Pune">
+          <p class="hint">Only the locality is shown publicly, never your full address.</p>
+        </div>
+        <div class="field">
+          <label for="college">College or organisation <span class="muted">(optional)</span></label>
+          <input type="text" id="college" name="college" value="<%= form.college || '' %>">
+        </div>
+      </div>
+
+      <button class="btn btn-block" type="submit">Create account</button>
+      <p class="center mt link-quiet">Already a member? <a href="/login">Log in</a></p>
+    </form>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

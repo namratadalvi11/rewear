@@ -1,0 +1,56 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Administration</p>
+  <h1>All Listings</h1>
+  <p class="lede">Remove listings that break the community guidelines. The owner is notified.</p>
+</div>
+
+<div class="wrap">
+  <%- include('/partials/admin-tabs') %>
+
+  <div class="panel">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Owner</th><th>Type</th><th>Category</th><th>Price</th>
+            <th>Status</th><th>Views</th><th>Listed</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <% if (!items.length) { %>
+            <tr><td colspan="9" class="muted">No listings yet.</td></tr>
+          <% } %>
+          <% items.forEach((i) => { %>
+            <tr>
+              <td><a href="/items/<%= i.id %>"><%= i.title %></a>
+                <div class="s muted"><%= i.location %></div></td>
+              <td><a href="/users/<%= i.owner_id %>"><%= i.owner_name %></a></td>
+              <td><span class="badge"><%= i.listing_type %></span></td>
+              <td class="muted"><%= i.category %></td>
+              <td><% if (i.listing_type === 'rent') { %><%= money(i.rental_price) %>/day
+                <% } else if (i.listing_type === 'sell') { %><%= money(i.sale_price) %>
+                <% } else { %>-<% } %></td>
+              <td><span class="badge status status-<%= i.status === 'active' ? 'accepted'
+                : (i.status === 'removed' ? 'rejected' : 'pending') %>"><%= i.status %></span></td>
+              <td><%= i.views %></td>
+              <td class="muted"><%= prettyDate(i.created_at.slice(0, 10)) %></td>
+              <td>
+                <% if (i.status !== 'removed') { %>
+                  <form method="post" action="/admin/listings/<%= i.id %>/remove"
+                        data-confirm="Remove this listing? The owner will be notified.">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+                  </form>
+                <% } else { %>
+                  <span class="muted">removed</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

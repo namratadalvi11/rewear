@@ -1,0 +1,74 @@
+<%# One clothing card. Locals: item, mode ('all' | 'rent' | 'sell' | 'donate') %>
+<% const cardMode = mode === 'all' ? item.listing_type : mode; %>
+<% const saved = user && wishlistIds.includes(Number(item.id)); %>
+<% const cardQuery = new URLSearchParams(query || {}).toString(); %>
+<% const cardBack = path + (cardQuery ? '?' + cardQuery : ''); %>
+<article class="listing-card">
+  <div class="card-media">
+    <a href="/items/<%= item.id %>" tabindex="-1" aria-hidden="true">
+      <img src="<%= itemImage(item) %>" alt="<%= item.title %>" loading="lazy" width="400" height="500">
+    </a>
+    <span class="card-tag">
+      <%= cardMode === 'rent' ? 'Rent' : (cardMode === 'sell' ? 'Buy' : 'Donate') %>
+    </span>
+    <% if (cardMode === 'rent') { %>
+      <span class="card-avail">
+        <% if (item.status === 'paused') { %>Paused
+        <% } else if (item.available_to) { %>Until <%= prettyDate(item.available_to) %>
+        <% } else { %>Available<% } %>
+      </span>
+    <% } else if (item.status !== 'active') { %>
+      <span class="card-avail"><%= item.status %></span>
+    <% } %>
+    <% if (user) { %>
+      <form class="wishlist-action" method="post" action="/wishlist/<%= item.id %>/<%= saved ? 'remove' : 'add' %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="back" value="<%= cardBack %>">
+        <button class="wishlist-button <%= saved ? 'saved' : '' %>" type="submit"
+                aria-label="<%= saved ? 'Remove from' : 'Add to' %> wishlist: <%= item.title %>"
+                aria-pressed="<%= saved ? 'true' : 'false' %>" title="<%= saved ? 'Remove from wishlist' : 'Add to wishlist' %>">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.5-8.8 11-8.8 11s-8.8-5.5-8.8-11A4.8 4.8 0 0 1 12 6.3a4.8 4.8 0 0 1 8.8 2.5Z"></path></svg>
+        </button>
+      </form>
+    <% } else { %>
+      <a class="wishlist-button" href="/login" aria-label="Log in to add <%= item.title %> to your wishlist" title="Log in to save">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.5-8.8 11-8.8 11s-8.8-5.5-8.8-11A4.8 4.8 0 0 1 12 6.3a4.8 4.8 0 0 1 8.8 2.5Z"></path></svg>
+      </a>
+    <% } %>
+  </div>
+
+  <div class="card-body">
+    <a href="/items/<%= item.id %>" class="card-title"><%= item.title %></a>
+    <div class="card-meta">
+      <span><%= item.category %></span>
+      <% if (item.brand) { %><span><%= item.brand %></span><% } %>
+      <span>Size <%= item.size === 'Custom Measurements' ? 'Custom' : item.size %></span>
+      <span><%= item.condition %></span>
+      <% if (item.occasion) { %><span><%= item.occasion %></span><% } %>
+    </div>
+    <div class="card-price">
+      <% if (cardMode === 'rent') { %>
+        <%= money(item.rental_price) %> <small>/ day</small>
+      <% } else if (cardMode === 'sell') { %>
+        <%= money(item.sale_price) %>
+        <% if (item.original_price > item.sale_price) { %>
+          <small><s><%= money(item.original_price) %></s></small>
+        <% } %>
+      <% } else { %>
+        Free <small>to a good home</small>
+      <% } %>
+    </div>
+    <div class="card-foot">
+      <span class="muted" style="font-size:.78rem">
+        <%= item.location %>
+        <% if (item.verification === 'verified') { %>
+          <span class="badge badge-verified" style="margin-left:4px">Verified</span>
+        <% } %>
+      </span>
+      <% if (item.owner_rating) { %>
+        <span class="stars" title="Owner rating <%= item.owner_rating %> out of 5"><%= stars(item.owner_rating) %></span>
+      <% } %>
+    </div>
+    <a class="btn btn-quiet btn-sm btn-block" href="/items/<%= item.id %>">View Item</a>
+  </div>
+</article>

@@ -1,0 +1,109 @@
+<%# Filter sidebar. Locals: mode, option lists, query (current query string values) %>
+<%
+  const action = mode === 'sell' ? '/resale'
+    : (mode === 'donate' ? '/donate' : (mode === 'all' ? '/explore' : '/browse'));
+  const val = (k) => query[k] || '';
+%>
+<form class="filters" method="get" action="<%= action %>">
+  <input type="hidden" name="q" value="<%= val('q') %>">
+  <input type="hidden" name="sort" value="<%= val('sort') %>">
+
+  <div class="panel-head">
+    <h3>Filters</h3>
+    <a class="link-quiet" href="<%= action %>">Clear all</a>
+  </div>
+
+  <div class="filter-group">
+    <div class="field">
+      <label for="f-category">Category</label>
+      <select id="f-category" name="category">
+        <option value="">All categories</option>
+        <% CATEGORIES.forEach((c) => { %>
+          <option value="<%= c %>" <%= val('category') === c ? 'selected' : '' %>><%= c %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="field">
+      <label for="f-gender">For</label>
+      <select id="f-gender" name="gender">
+        <option value="">Everyone</option>
+        <% GENDERS.forEach((g) => { %>
+          <option value="<%= g %>" <%= val('gender') === g ? 'selected' : '' %>><%= g %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="field">
+      <label for="f-occasion">Occasion</label>
+      <select id="f-occasion" name="occasion">
+        <option value="">Any occasion</option>
+        <% OCCASIONS.forEach((o) => { %>
+          <option value="<%= o %>" <%= val('occasion') === o ? 'selected' : '' %>><%= o %></option>
+        <% }) %>
+      </select>
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <div class="field">
+      <label for="f-size">Size</label>
+      <select id="f-size" name="size">
+        <option value="">Any size</option>
+        <% SIZES.forEach((s) => { %>
+          <option value="<%= s %>" <%= val('size') === s ? 'selected' : '' %>><%= s %></option>
+        <% }) %>
+      </select>
+      <p class="hint">Items listed as “Custom Measurements” include exact measurements on the item page.</p>
+    </div>
+    <div class="field">
+      <label for="f-condition">Condition</label>
+      <select id="f-condition" name="condition">
+        <option value="">Any condition</option>
+        <% CONDITIONS.forEach((c) => { %>
+          <option value="<%= c %>" <%= val('condition') === c ? 'selected' : '' %>><%= c %></option>
+        <% }) %>
+      </select>
+    </div>
+  </div>
+
+  <% if (mode !== 'donate') { %>
+    <div class="filter-group">
+      <label><%= mode === 'sell' ? 'Sale price' : 'Rent per day' %> (<%= '₹' %>)</label>
+      <div class="row" style="gap:8px">
+        <input type="number" name="min_price" min="0" step="50" placeholder="Min"
+               value="<%= val('min_price') %>" aria-label="Minimum price">
+        <input type="number" name="max_price" min="0" step="50" placeholder="Max"
+               value="<%= val('max_price') %>" aria-label="Maximum price">
+      </div>
+    </div>
+  <% } %>
+
+  <div class="filter-group">
+    <div class="field">
+      <label for="f-brand">Brand</label>
+      <input type="search" id="f-brand" name="brand" value="<%= val('brand') %>"
+             placeholder="Any brand">
+    </div>
+    <div class="field">
+      <label for="f-location">Locality / community</label>
+      <input type="text" id="f-location" name="location" placeholder="e.g. Kothrud"
+             value="<%= val('location') %>">
+    </div>
+  </div>
+
+  <% if (mode === 'rent' || !mode) { %>
+    <div class="filter-group">
+      <label>Needed between</label>
+      <div class="field">
+        <input type="date" name="from" min="<%= today %>" value="<%= val('from') %>"
+               aria-label="Needed from">
+      </div>
+      <div class="field">
+        <input type="date" name="to" min="<%= today %>" value="<%= val('to') %>"
+               aria-label="Needed until">
+      </div>
+      <p class="hint">Shows only items free for the whole range.</p>
+    </div>
+  <% } %>
+
+  <button class="btn btn-block" type="submit">Apply Filters</button>
+</form>

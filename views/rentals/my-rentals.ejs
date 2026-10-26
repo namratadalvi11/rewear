@@ -1,0 +1,75 @@
+<%- include('/partials/head') %>
+<%
+  const open = rentals.filter((r) => ['pending', 'accepted', 'active', 'returned'].includes(r.status));
+  const past = rentals.filter((r) => !['pending', 'accepted', 'active', 'returned'].includes(r.status));
+%>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Borrowed from the community</p>
+  <h1>My Rentals</h1>
+  <p class="lede">Everything you have requested or rented, and where each booking stands.</p>
+</div>
+
+<div class="wrap">
+  <div class="tabs">
+    <a href="/rentals" class="on">My Rentals</a>
+    <a href="/rentals/requests">Requests for My Items</a>
+    <a href="/requests">Resale &amp; Donation</a>
+  </div>
+
+  <% if (!rentals.length) { %>
+    <%- include('/partials/empty', {
+      heading: "You don't have any rentals yet.",
+      text: 'Explore the community wardrobe and request something for your next occasion.',
+      cta: 'Browse Clothes', href: '/browse' }) %>
+  <% } else { %>
+
+    <% if (open.length) { %>
+      <div class="panel mb">
+        <div class="panel-head"><h2 style="font-size:1.25rem">Current &amp; upcoming</h2></div>
+        <% open.forEach((r) => { %>
+          <div class="mini">
+            <img src="<%= itemImage(r) %>" alt="">
+            <div>
+              <a href="/rentals/<%= r.id %>" class="t"><%= r.title %></a>
+              <div class="s"><%= prettyDate(r.start_date) %> &ndash; <%= prettyDate(r.end_date) %>
+                &middot; from <%= r.owner_name %></div>
+              <div class="s"><%= money(r.rental_price) %> for <%= r.days %> day<%= r.days === 1 ? '' : 's' %>
+                + <%= money(r.security_deposit) %> deposit</div>
+            </div>
+            <div class="end">
+              <span class="badge status status-<%= r.status %>"><%= r.status %></span>
+              <div style="margin-top:8px">
+                <a class="btn btn-quiet btn-sm" href="/rentals/<%= r.id %>">View</a>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <% if (past.length) { %>
+      <div class="panel">
+        <div class="panel-head"><h2 style="font-size:1.25rem">Past bookings</h2></div>
+        <% past.forEach((r) => { %>
+          <div class="mini">
+            <img src="<%= itemImage(r) %>" alt="">
+            <div>
+              <a href="/rentals/<%= r.id %>" class="t"><%= r.title %></a>
+              <div class="s"><%= prettyDate(r.start_date) %> &ndash; <%= prettyDate(r.end_date) %>
+                &middot; from <%= r.owner_name %></div>
+            </div>
+            <div class="end">
+              <span class="badge status status-<%= r.status %>"><%= r.status %></span>
+              <% if (r.status === 'completed') { %>
+                <div style="margin-top:8px"><a class="btn btn-quiet btn-sm" href="/reviews">Review</a></div>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  <% } %>
+</div>
+
+<%- include('/partials/foot') %>

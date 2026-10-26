@@ -1,0 +1,81 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Administration</p>
+  <h1>Donation Drives</h1>
+  <p class="lede">Drives shown on the Donation Hub. Seeded entries are marked as demo organisations;
+    anything you add here is treated as real.</p>
+</div>
+
+<div class="wrap">
+  <%- include('/partials/admin-tabs') %>
+
+  <div class="dash-grid">
+    <div class="panel">
+      <div class="panel-head"><h2 style="font-size:1.2rem">Current drives</h2></div>
+      <% if (!drives.length) { %>
+        <p class="muted" style="margin:0">No drives yet. Add one using the form.</p>
+      <% } %>
+      <% drives.forEach((d) => { %>
+        <div class="mini" style="align-items:flex-start">
+          <div>
+            <div class="t"><%= d.title %>
+              <% if (d.is_demo) { %><span class="badge badge-gold">demo</span><% } %></div>
+            <div class="s muted"><%= d.organization %><% if (d.location) { %> &middot; <%= d.location %><% } %></div>
+            <% if (d.starts_on) { %>
+              <div class="s muted"><%= prettyDate(d.starts_on) %>
+                <% if (d.ends_on) { %> &ndash; <%= prettyDate(d.ends_on) %><% } %></div>
+            <% } %>
+            <% if (d.description) { %>
+              <p class="soft" style="margin:6px 0 0;font-size:.86rem"><%= d.description %></p>
+            <% } %>
+          </div>
+          <div class="end">
+            <form method="post" action="/admin/drives/<%= d.id %>/delete" data-confirm="Delete this drive?">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button class="btn btn-quiet btn-sm" type="submit">Delete</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2 style="font-size:1.2rem">Add a drive</h2></div>
+      <form method="post" action="/admin/drives">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="field">
+          <label for="title">Drive title</label>
+          <input type="text" id="title" name="title" required placeholder="Winter Clothing Collection">
+        </div>
+        <div class="field">
+          <label for="organization">Organisation</label>
+          <input type="text" id="organization" name="organization" required
+                 placeholder="Name of the collecting organisation">
+        </div>
+        <div class="field">
+          <label for="location">Location</label>
+          <input type="text" id="location" name="location" placeholder="Collection point">
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="starts_on">Starts</label>
+            <input type="date" id="starts_on" name="starts_on">
+          </div>
+          <div class="field">
+            <label for="ends_on">Ends</label>
+            <input type="date" id="ends_on" name="ends_on">
+          </div>
+        </div>
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="3" style="min-height:80px"></textarea>
+        </div>
+        <button class="btn" type="submit">Add drive</button>
+        <p class="hint">Only add organisations that have actually agreed to collect clothes.</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

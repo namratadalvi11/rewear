@@ -1,0 +1,58 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Administration</p>
+  <h1>Members</h1>
+  <p class="lede">Verify members so they can rent and list. Pending requests are listed first.</p>
+</div>
+
+<div class="wrap">
+  <%- include('/partials/admin-tabs') %>
+
+  <div class="panel">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Member</th><th>Locality</th><th>College</th><th>Status</th>
+            <th>Listings</th><th>Rentals</th><th>Joined</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach((u) => { %>
+            <tr>
+              <td>
+                <a href="/users/<%= u.id %>"><strong><%= u.name %></strong></a>
+                <% if (u.role === 'admin') { %> <span class="badge badge-ink">Admin</span><% } %>
+                <div class="s muted"><%= u.email %></div>
+              </td>
+              <td><%= u.location %></td>
+              <td class="muted"><%= u.college || '-' %></td>
+              <td>
+                <span class="badge badge-<%= u.verification === 'verified' ? 'verified'
+                  : (u.verification === 'pending' ? 'pending' : '') %>"><%= u.verification %></span>
+              </td>
+              <td><%= u.listings %></td>
+              <td><%= u.rentals %></td>
+              <td class="muted"><%= prettyDate(u.created_at.slice(0, 10)) %></td>
+              <td>
+                <form method="post" action="/admin/users/<%= u.id %>/verification">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <% if (u.verification === 'verified') { %>
+                    <input type="hidden" name="status" value="unverified">
+                    <button class="btn btn-quiet btn-sm" type="submit">Revoke</button>
+                  <% } else { %>
+                    <input type="hidden" name="status" value="verified">
+                    <button class="btn btn-sm" type="submit">Verify</button>
+                  <% } %>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

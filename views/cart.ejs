@@ -1,0 +1,72 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Rental checkout</p>
+  <h1>Your Rental Cart</h1>
+  <p class="lede">Review your dates and estimated rent before sending requests to the item owners.</p>
+</div>
+
+<div class="wrap">
+  <% if (!cartItems.length) { %>
+    <%- include('/partials/empty', {
+      heading: 'Your rental cart is empty.',
+      text: 'Choose an item and rental dates to start a booking request.',
+      cta: 'Browse rentals', href: '/browse' }) %>
+  <% } else { %>
+    <div class="dash-grid">
+      <section class="panel">
+        <div class="panel-head"><h2 style="font-size:1.2rem">Selected rentals</h2></div>
+        <% cartItems.forEach((entry) => { %>
+          <div class="mini" style="align-items:flex-start">
+            <% if (entry.item) { %><img src="<%= itemImage(entry.item) %>" alt=""><% } %>
+            <div>
+              <% if (entry.item) { %>
+                <a class="t" href="/items/<%= entry.item.id %>"><%= entry.item.title %></a>
+                <div class="s">Size <%= entry.item.size %> · Owner: <%= entry.item.owner_name %></div>
+                <div class="s">
+                  <% if (entry.days > 0) { %>
+                    <%= prettyDate(entry.start_date) %> – <%= prettyDate(entry.end_date) %>
+                    · <%= entry.days %> day<%= entry.days === 1 ? '' : 's' %>
+                  <% } else { %>Invalid date range<% } %>
+                </div>
+                <div class="s"><%= money(entry.rentTotal) %> rent + <%= money(entry.deposit) %> refundable deposit</div>
+                <% if (entry.error) { %><p class="flash flash-error mt" role="alert"><%= entry.error %></p><% } %>
+              <% } else { %>
+                <strong>This listing is no longer available.</strong>
+                <div class="s">Remove it from your cart to continue.</div>
+              <% } %>
+            </div>
+            <form method="post" action="/cart/remove">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="item_id" value="<%= entry.item_id %>">
+              <button class="btn btn-quiet btn-sm" type="submit">Remove</button>
+            </form>
+          </div>
+        <% }) %>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-head"><h2 style="font-size:1.2rem">Estimated total</h2></div>
+        <dl class="specs">
+          <div><dt>Rental charges</dt><dd><%= money(rentTotal) %></dd></div>
+          <div><dt>Refundable deposits</dt><dd><%= money(depositTotal) %></dd></div>
+          <div><dt>Delivery</dt><dd><%= money(0) %></dd></div>
+          <div><dt>Platform fees</dt><dd><%= money(0) %></dd></div>
+          <div><dt>Estimated total</dt><dd><strong><%= money(rentTotal + depositTotal) %></strong></dd></div>
+        </dl>
+        <p class="hint">Delivery and platform fees are zero because handover is arranged locally
+          between members. Deposit and rent are not charged by ReWear.</p>
+        <p class="hint">Checkout sends booking requests; each owner must accept before a rental is confirmed.</p>
+        <form method="post" action="/cart/checkout" data-confirm="Submit rental requests for every available item? No payment will be collected.">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="btn btn-block" type="submit" <%= canCheckout ? '' : 'disabled' %>>
+            Submit rental requests
+          </button>
+        </form>
+        <a class="btn btn-quiet btn-block mt" href="/browse">Continue browsing</a>
+      </aside>
+    </div>
+  <% } %>
+</div>
+
+<%- include('/partials/foot') %>

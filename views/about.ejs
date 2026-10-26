@@ -1,0 +1,123 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Wear More. Waste Less.</p>
+  <h1>About ReWear</h1>
+  <p class="lede">ReWear is a community clothing reuse platform built as a Community Engagement
+    Project. It is deliberately small, practical and local.</p>
+</div>
+
+<section class="section-tight">
+  <div class="wrap">
+    <div class="dash-grid">
+      <div class="panel">
+        <h2 style="font-size:1.5rem">The problem we started from</h2>
+        <p class="soft">Almost everyone owns clothes bought for one occasion and worn once: a wedding
+          outfit, a festival saree, a blazer for an interview, something for a college event. They are
+          expensive, they take up space, and they sit unused.</p>
+        <p class="soft">Meanwhile the next person who needs that exact outfit for that exact occasion
+          usually buys a new one. Within a college or a neighbourhood, those two people are often a
+          ten-minute walk apart.</p>
+        <h2 style="font-size:1.5rem;margin-top:26px">What ReWear does</h2>
+        <p class="soft">ReWear lets people in one local community rent clothes to each other, with
+          resale and donation as supporting options for items someone is ready to let go of entirely.
+          Renting is the main focus: it is the case where one garment can serve many people.</p>
+        <p class="soft">The hard part is not listing clothes &mdash; it is trust. So the platform puts
+          most of its effort there: verified members, documented condition before and after every
+          rental, reviews only after completed transactions, local handover, and minimal personal
+          information on display.</p>
+      </div>
+
+      <div class="stack">
+        <div class="panel">
+          <h3>What is built and working</h3>
+          <ul class="trust">
+            <li><span class="tick">&#10003;</span><span>Accounts, login and admin verification</span></li>
+            <li><span class="tick">&#10003;</span><span>Listings for rent, sale and donation, with photo uploads</span></li>
+            <li><span class="tick">&#10003;</span><span>Search, filters and availability by date</span></li>
+            <li><span class="tick">&#10003;</span><span>Full rental flow with owner approval</span></li>
+            <li><span class="tick">&#10003;</span><span>Condition records before and after, with photos</span></li>
+            <li><span class="tick">&#10003;</span><span>Reviews, notifications and reports</span></li>
+            <li><span class="tick">&#10003;</span><span>Resale and donation enquiry flow, donation drives</span></li>
+            <li><span class="tick">&#10003;</span><span>Community survey and impact dashboard</span></li>
+            <li><span class="tick">&#10003;</span><span>Admin dashboard for members, listings and reports</span></li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>What it intentionally does not do</h3>
+          <p class="soft" style="margin:0">No payment processing, no delivery network, no insurance, no
+            AI. Rent and deposits are settled directly between members. Every one of those would add
+            a lot of machinery and very little to the core idea at this scale.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- future scope ---------- -->
+<section class="band" id="future">
+  <div class="wrap">
+    <div class="center" style="max-width:58ch;margin:0 auto 34px">
+      <p class="eyebrow">Future scope</p>
+      <h2>Where this could go next</h2>
+      <p class="soft">None of the following is part of the current version. They are listed as an
+        honest roadmap rather than features implied by buttons that do nothing.</p>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="pillar">
+        <h3>Your Digital Wardrobe</h3>
+        <p class="soft">Upload your wardrobe and discover ways to rent, resell, donate or style what
+          you already own.</p>
+        <button class="btn btn-quiet btn-sm" type="button" disabled>Coming Soon</button>
+      </div>
+      <div class="pillar">
+        <h3>ReWear Score</h3>
+        <p class="soft">A reuse score built from rentals, number of wears, resale, donations and item
+          condition &mdash; a real calculation over real activity, not a guessed number.</p>
+        <button class="btn btn-quiet btn-sm" type="button" disabled>Coming Soon</button>
+      </div>
+      <div class="pillar">
+        <h3>Smarter discovery</h3>
+        <p class="soft">Outfit recommendations, size matching from saved measurements, and a proper
+          recommendation engine once there is enough activity to learn from.</p>
+        <button class="btn btn-quiet btn-sm" type="button" disabled>Coming Soon</button>
+      </div>
+    </div>
+
+    <div class="panel mt">
+      <h3>Longer-term ideas</h3>
+      <div class="grid grid-2">
+        <ul class="trust">
+          <li><span class="tick">&rarr;</span><span>AI-assisted condition checks from photos</span></li>
+          <li><span class="tick">&rarr;</span><span>Digital payments and escrow for deposits</span></li>
+          <li><span class="tick">&rarr;</span><span>Delivery and pickup partnerships</span></li>
+          <li><span class="tick">&rarr;</span><span>Damage protection or insurance</span></li>
+        </ul>
+        <ul class="trust">
+          <li><span class="tick">&rarr;</span><span>Laundry and dry-cleaning partners between rentals</span></li>
+          <li><span class="tick">&rarr;</span><span>Verified NGO partnerships for donations</span></li>
+          <li><span class="tick">&rarr;</span><span>Community rewards for consistent lenders</span></li>
+          <li><span class="tick">&rarr;</span><span>Campus-level and society-level sub-communities</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- CTA ---------- -->
+<section>
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>Have clothes sitting unused?</h2>
+      <p>Listing takes about two minutes. Rent them out, resell them, or pass them on.</p>
+      <div class="row">
+        <a class="btn btn-gold" href="<%= user ? '/items/new' : '/register' %>">Give Them Another Life</a>
+        <a class="btn btn-ghost" style="border-color:rgba(255,255,255,.55);color:#fff"
+           href="/community/survey">Take the survey</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('/partials/foot') %>

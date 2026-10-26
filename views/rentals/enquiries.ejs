@@ -1,0 +1,122 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Resale &amp; donation</p>
+  <h1>Requests</h1>
+  <p class="lede">ReWear does not handle payments. Once you accept, contact details are shared and
+    you arrange the handover between yourselves.</p>
+</div>
+
+<div class="wrap">
+  <div class="tabs">
+    <a href="/rentals">My Rentals</a>
+    <a href="/rentals/requests">Requests for My Items</a>
+    <a href="/requests" class="on">Resale &amp; Donation</a>
+  </div>
+
+  <div class="dash-grid">
+    <!-- ---------- incoming ---------- -->
+    <div class="panel">
+      <div class="panel-head"><h2 style="font-size:1.2rem">Requests for my items</h2></div>
+      <% if (!incoming.length) { %>
+        <p class="muted" style="margin:0">No requests yet. When someone is interested in an item you
+          listed for sale or donation, it will show up here.</p>
+      <% } else { %>
+        <% incoming.forEach((q) => { %>
+          <div class="mini" style="align-items:flex-start">
+            <img src="<%= itemImage(q) %>" alt="">
+            <div>
+              <a href="/items/<%= q.item_id %>" class="t"><%= q.title %></a>
+              <div class="s"><%= q.kind === 'sell' ? money(q.sale_price) : 'Donation' %>
+                &middot; <%= q.condition %></div>
+              <% if (q.kind === 'donate') { %>
+                <div class="s">Reference <strong><%= q.request_code %></strong> · <%= q.quantity %> garment(s)</div>
+                <% if (q.pickup_date) { %>
+                  <div class="s"><%= q.handover_method %> · <%= prettyDate(q.pickup_date) %> · <%= q.time_slot %></div>
+                  <div class="s">Preferred locality: <%= q.pickup_location %></div>
+                <% } else { %>
+                  <div class="s">Collection details were not recorded for this older request.</div>
+                <% } %>
+              <% } %>
+              <div class="s">From <a href="/users/<%= q.requester_id %>"><%= q.requester_name %></a></div>
+              <% if (q.message) { %>
+                <p class="soft" style="margin:6px 0 0;font-size:.86rem">&ldquo;<%= q.message %>&rdquo;</p>
+              <% } %>
+              <% if (['accepted', 'completed'].includes(q.status)) { %>
+                <p style="margin:6px 0 0;font-size:.86rem"><strong>Phone:</strong> <%= q.requester_phone %></p>
+              <% } %>
+            </div>
+            <div class="end">
+              <span class="badge status status-<%= q.status %>"><%= q.status %></span>
+              <div class="row" style="justify-content:flex-end;gap:6px;margin-top:8px">
+                <% if (q.status === 'pending') { %>
+                  <form method="post" action="/requests/<%= q.id %>/accept">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-sm" type="submit">Accept</button>
+                  </form>
+                  <form method="post" action="/requests/<%= q.id %>/reject">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-quiet btn-sm" type="submit">Decline</button>
+                  </form>
+                <% } else if (q.status === 'accepted') { %>
+                  <form method="post" action="/requests/<%= q.id %>/complete"
+                        data-confirm="Mark this item as handed over? The listing will close.">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-sm" type="submit">Mark handed over</button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <!-- ---------- outgoing ---------- -->
+    <div class="panel">
+      <div class="panel-head"><h2 style="font-size:1.2rem">My requests</h2></div>
+      <% if (!outgoing.length) { %>
+        <p class="muted" style="margin:0">You haven&rsquo;t asked for anything yet.
+          <a href="/resale">Browse the resale hub</a> or
+          <a href="/donate">the donation hub</a>.</p>
+      <% } else { %>
+        <% outgoing.forEach((q) => { %>
+          <div class="mini" style="align-items:flex-start">
+            <img src="<%= itemImage(q) %>" alt="">
+            <div>
+              <a href="/items/<%= q.item_id %>" class="t"><%= q.title %></a>
+              <div class="s"><%= q.kind === 'sell' ? money(q.sale_price) : 'Donation' %>
+                &middot; <%= q.item_location %></div>
+              <% if (q.kind === 'donate') { %>
+                <div class="s">Reference <strong><%= q.request_code %></strong> · <%= q.quantity %> garment(s)</div>
+                <% if (q.pickup_date) { %>
+                  <div class="s"><%= q.handover_method %> · <%= prettyDate(q.pickup_date) %> · <%= q.time_slot %></div>
+                  <div class="s">Preferred locality: <%= q.pickup_location %></div>
+                <% } else { %>
+                  <div class="s">Collection details were not recorded for this older request.</div>
+                <% } %>
+              <% } %>
+              <div class="s">Owner: <a href="/users/<%= q.owner_id %>"><%= q.owner_name %></a></div>
+              <% if (['accepted', 'completed'].includes(q.status)) { %>
+                <p style="margin:6px 0 0;font-size:.86rem"><strong>Phone:</strong> <%= q.owner_phone %></p>
+              <% } %>
+            </div>
+            <div class="end">
+              <span class="badge status status-<%= q.status %>"><%= q.status %></span>
+              <% if (q.status === 'pending') { %>
+                <form method="post" action="/requests/<%= q.id %>/cancel" style="margin-top:8px">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn btn-quiet btn-sm" type="submit">Withdraw</button>
+                </form>
+              <% } else if (q.status === 'completed') { %>
+                <div style="margin-top:8px"><a class="btn btn-quiet btn-sm" href="/reviews">Review</a></div>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

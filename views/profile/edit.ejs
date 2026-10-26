@@ -1,0 +1,96 @@
+<%- include('/partials/head') %>
+
+<div class="wrap wrap-narrow page-head">
+  <p class="eyebrow">Your account</p>
+  <h1>My Profile</h1>
+  <p class="lede">Your phone number stays private. It is shared with the other member only after a
+    booking is confirmed.</p>
+</div>
+
+<div class="wrap wrap-narrow">
+  <div class="panel">
+    <% if (errors.length) { %>
+      <div class="errors" role="alert">
+        <ul><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul>
+      </div>
+    <% } %>
+
+    <form method="post" action="/profile" enctype="multipart/form-data" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="row mb" style="gap:16px">
+        <% if (user.profile_image) { %>
+          <img class="avatar" src="<%= user.profile_image %>" alt="" style="width:64px;height:64px">
+        <% } else { %>
+          <span class="avatar avatar-fallback" style="width:64px;height:64px;font-size:1.3rem"
+                aria-hidden="true"><%= user.name.charAt(0).toUpperCase() %></span>
+        <% } %>
+        <div style="flex:1">
+          <label for="profile_image">Profile photo</label>
+          <input type="file" id="profile_image" name="profile_image" accept="image/*">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="name">Full name</label>
+        <input type="text" id="name" name="name" value="<%= user.name %>" required>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" value="<%= user.email %>" disabled>
+          <p class="hint">Email cannot be changed in this version.</p>
+        </div>
+        <div class="field">
+          <label for="phone">Phone (private)</label>
+          <input type="tel" id="phone" name="phone" value="<%= user.phone %>" required>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="location">Locality / community</label>
+          <input type="text" id="location" name="location" value="<%= user.location %>" required>
+        </div>
+        <div class="field">
+          <label for="college">College or organisation</label>
+          <input type="text" id="college" name="college" value="<%= user.college || '' %>">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="bio">Short bio <span class="muted">(optional, shown publicly)</span></label>
+        <textarea id="bio" name="bio" rows="3" style="min-height:80px"
+                  placeholder="A line about you and the kind of clothes you share."><%= user.bio || '' %></textarea>
+      </div>
+
+      <div class="row">
+        <button class="btn" type="submit">Save profile</button>
+        <a class="btn btn-quiet" href="/users/<%= user.id %>">View public profile</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel mt">
+    <div class="row row-between">
+      <div>
+        <h3 style="margin:0">Verification</h3>
+        <p class="muted" style="margin:4px 0 0;font-size:.88rem">
+          Status: <strong><%= user.verification %></strong></p>
+      </div>
+      <% if (user.verification !== 'verified') { %>
+        <a class="btn btn-quiet btn-sm" href="/profile/verify">Get verified</a>
+      <% } else { %>
+        <span class="badge badge-verified">&#10003; Verified</span>
+      <% } %>
+    </div>
+  </div>
+
+  <form method="post" action="/logout" class="mt center">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <button class="btn btn-quiet btn-sm" type="submit">Log out</button>
+  </form>
+</div>
+
+<%- include('/partials/foot') %>

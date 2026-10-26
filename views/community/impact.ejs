@@ -1,0 +1,171 @@
+<%- include('/partials/head') %>
+<%
+  const maxCat = Math.max(1, ...byCategory.map((c) => c.n));
+  const maxLoc = Math.max(1, ...topLocations.map((l) => l.n));
+  const typeCount = (t) => (byType.find((x) => x.listing_type === t) || { n: 0 }).n;
+%>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Community Engagement Project</p>
+  <h1>Community Impact</h1>
+  <p class="lede">Every number on this page is counted directly from activity on this platform.
+    Nothing here is illustrative.</p>
+</div>
+
+<!-- ---------- headline numbers ---------- -->
+<section class="section-tight">
+  <div class="wrap">
+    <div class="tiles">
+      <div class="tile accent"><div class="n"><%= stats.users %></div><div class="l">Registered members</div></div>
+      <div class="tile"><div class="n"><%= stats.verified %></div><div class="l">Verified members</div></div>
+      <div class="tile"><div class="n"><%= stats.listed %></div><div class="l">Clothes listed</div></div>
+      <div class="tile"><div class="n"><%= stats.rentals %></div><div class="l">Rentals completed</div></div>
+      <div class="tile"><div class="n"><%= stats.resold %></div><div class="l">Items resold</div></div>
+      <div class="tile"><div class="n"><%= stats.donated %></div><div class="l">Items donated</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- clothing reuse ---------- -->
+<section class="band">
+  <div class="wrap">
+    <div class="dash-grid">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Clothing reuse</p>
+            <h2 style="font-size:1.5rem">What has been reused</h2>
+          </div>
+        </div>
+        <p class="soft">A reuse event is one garment passing to someone who will actually wear it:
+          a completed rental, a resold item, or a donated item.</p>
+
+        <div class="tiles mb">
+          <div class="tile"><div class="n"><%= reuseEvents %></div><div class="l">Reuse events</div></div>
+          <div class="tile"><div class="n"><%= stats.activeRentals %></div><div class="l">Rentals in progress</div></div>
+          <div class="tile"><div class="n"><%= stats.reviews %></div><div class="l">Transaction reviews</div></div>
+        </div>
+
+        <div class="panel panel-tight" style="background:var(--cream)">
+          <h3 style="font-size:.95rem">About estimates</h3>
+          <p class="soft" style="margin:0;font-size:.88rem">We deliberately do not publish water or
+            carbon figures. Converting a rental into litres of water saved needs assumptions about the
+            garment, the fabric and what the person would otherwise have bought &mdash; none of which
+            this platform knows. The honest measure is the count above: clothes that were used again
+            instead of bought new or thrown away.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Listing mix</p>
+            <h2 style="font-size:1.5rem">How members use ReWear</h2>
+          </div>
+        </div>
+        <div class="columns" role="img"
+             aria-label="Listings by type: <%= typeCount('rent') %> for rent, <%= typeCount('sell') %> for sale, <%= typeCount('donate') %> for donation">
+          <% const maxType = Math.max(1, typeCount('rent'), typeCount('sell'), typeCount('donate')); %>
+          <% [['rent','For rent'],['sell','For sale'],['donate','Donation']].forEach(([k, label]) => { %>
+            <div class="col">
+              <span class="val"><%= typeCount(k) %></span>
+              <div class="fill" style="height:<%= Math.round((typeCount(k) / maxType) * 100) %>%"></div>
+              <span class="cap"><%= label %></span>
+            </div>
+          <% }) %>
+        </div>
+        <p class="hint center">Renting is the main use, with resale and donation as supporting options.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- category + location breakdown ---------- -->
+<section>
+  <div class="wrap">
+    <div class="dash-grid">
+      <div class="panel">
+        <div class="panel-head"><h2 style="font-size:1.4rem">Clothes listed by category</h2></div>
+        <% if (byCategory.length) { %>
+          <div class="bars">
+            <% byCategory.forEach((c) => { %>
+              <div class="bar-row">
+                <span><%= c.category %></span>
+                <span class="bar-track">
+                  <span class="bar-fill" style="width:<%= Math.round((c.n / maxCat) * 100) %>%"></span>
+                </span>
+                <span class="v"><%= c.n %></span>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="muted" style="margin:0">Nothing listed yet.</p>
+        <% } %>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2 style="font-size:1.4rem">Most active localities</h2></div>
+        <% if (topLocations.length) { %>
+          <div class="bars">
+            <% topLocations.forEach((l) => { %>
+              <div class="bar-row">
+                <span><%= l.location %></span>
+                <span class="bar-track">
+                  <span class="bar-fill gold" style="width:<%= Math.round((l.n / maxLoc) * 100) %>%"></span>
+                </span>
+                <span class="v"><%= l.n %></span>
+              </div>
+            <% }) %>
+          </div>
+          <p class="hint">Localities matter because every handover happens in person.</p>
+        <% } else { %>
+          <p class="muted" style="margin:0">No localities recorded yet.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- community participation ---------- -->
+<section class="band-forest">
+  <div class="wrap">
+    <div class="dash-grid" style="align-items:center">
+      <div>
+        <p class="eyebrow" style="color:var(--gold)">Community participation</p>
+        <h2>Why reuse matters here</h2>
+        <p class="muted">Occasion wear is the clearest case of clothes bought for a single use:
+          a wedding outfit, an interview blazer, a festival saree. Within a college or a
+          neighbourhood, the same garment can serve many people across a year instead of one person once.</p>
+        <p class="muted">ReWear exists to make that sharing practical &mdash; with verification,
+          condition records and reviews so people trust handing their clothes to a neighbour.</p>
+        <div class="row">
+          <a class="btn btn-gold" href="/community/survey">Take the community survey</a>
+          <a class="btn btn-ghost" style="border-color:rgba(255,255,255,.5);color:#fff"
+             href="/browse">Browse clothes</a>
+        </div>
+      </div>
+      <div class="stat-strip" style="grid-template-columns:repeat(2,1fr)">
+        <div class="stat"><div class="n"><%= responses %></div><div class="l">Survey responses</div></div>
+        <div class="stat"><div class="n"><%= stats.users %></div><div class="l">Members</div></div>
+        <div class="stat"><div class="n"><%= reuseEvents %></div><div class="l">Clothes reused</div></div>
+        <div class="stat"><div class="n"><%= stats.donated %></div><div class="l">Donations</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- donation activity ---------- -->
+<section>
+  <div class="wrap center">
+    <p class="eyebrow">Donation activity</p>
+    <h2>Clothes passed forward</h2>
+    <p class="soft" style="max-width:56ch;margin:0 auto 24px">
+      <strong><%= typeCount('donate') %></strong> item<%= typeCount('donate') === 1 ? '' : 's' %>
+      listed for donation, of which <strong><%= stats.donated %></strong>
+      <%= stats.donated === 1 ? 'has' : 'have' %> been handed over.
+      Collection drives are managed by an administrator.</p>
+    <a class="btn" href="/donate">Visit the Donation Hub</a>
+  </div>
+</section>
+
+<%- include('/partials/foot') %>

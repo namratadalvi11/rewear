@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> · ReWear</title>
+  <meta name="description" content="ReWear - rent, resell and donate clothes within your trusted community. Wear More. Waste Less.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css?v=20261013-reference-qa-6">
+  <link rel="stylesheet" href="/css/app.css?v=1">
+  <link rel="icon" href="/placeholder.svg?c=Kurtas&t=ReWear">
+</head>
+<body class="<%= path === '/' ? 'home-route' : '' %>">
+<a class="skip-link" href="#main">Skip to main content</a>
+<%- include('/partials/navbar') %>
+<% if (flash) { %>
+  <div class="wrap"><div class="flash flash-<%= flash.type %>" role="status"><%= flash.text %></div></div>
+<% } %>
+<main id="main" class="<%= path === '/' ? 'home-page' : '' %>">

@@ -1,0 +1,75 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Administration</p>
+  <h1>Admin Dashboard</h1>
+  <p class="lede">Platform statistics and the queues that need a human decision.</p>
+</div>
+
+<div class="wrap">
+  <%- include('/partials/admin-tabs') %>
+
+  <!-- ---------- queues needing attention ---------- -->
+  <div class="grid grid-2 mb">
+    <div class="panel">
+      <div class="row row-between">
+        <div>
+          <h2 style="font-size:1.2rem;margin:0">Verification requests</h2>
+          <p class="muted" style="margin:4px 0 0;font-size:.88rem">
+            <%= pendingVerifications %> member<%= pendingVerifications === 1 ? '' : 's' %> waiting</p>
+        </div>
+        <a class="btn btn-sm <%= pendingVerifications ? '' : 'btn-quiet' %>" href="/admin/users">Review</a>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="row row-between">
+        <div>
+          <h2 style="font-size:1.2rem;margin:0">Open reports</h2>
+          <p class="muted" style="margin:4px 0 0;font-size:.88rem">
+            <%= openReports %> report<%= openReports === 1 ? '' : 's' %> to look at</p>
+        </div>
+        <a class="btn btn-sm <%= openReports ? 'btn-danger' : 'btn-quiet' %>" href="/admin/reports">Review</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- statistics ---------- -->
+  <div class="tiles mb">
+    <div class="tile accent"><div class="n"><%= stats.users %></div><div class="l">Total members</div></div>
+    <div class="tile"><div class="n"><%= stats.verified %></div><div class="l">Verified</div></div>
+    <div class="tile"><div class="n"><%= stats.listed %></div><div class="l">Listings</div></div>
+    <div class="tile"><div class="n"><%= stats.rentals %></div><div class="l">Rentals completed</div></div>
+    <div class="tile"><div class="n"><%= stats.resold %></div><div class="l">Resales</div></div>
+    <div class="tile"><div class="n"><%= stats.donated %></div><div class="l">Donations</div></div>
+    <div class="tile"><div class="n"><%= openReports %></div><div class="l">Open reports</div></div>
+    <div class="tile"><div class="n"><%= surveyCount %></div><div class="l">Survey responses</div></div>
+  </div>
+
+  <!-- ---------- newest listings ---------- -->
+  <div class="panel">
+    <div class="panel-head">
+      <h2 style="font-size:1.2rem">Newest listings</h2>
+      <a class="link-quiet" href="/admin/listings">All listings &rarr;</a>
+    </div>
+    <% if (recent.length) { %>
+      <% recent.forEach((item) => { %>
+        <div class="mini">
+          <img src="<%= itemImage(item) %>" alt="">
+          <div>
+            <a href="/items/<%= item.id %>" class="t"><%= item.title %></a>
+            <div class="s"><%= item.category %> &middot; <%= item.listing_type %> &middot;
+              by <a href="/users/<%= item.owner_id %>"><%= item.owner_name %></a></div>
+          </div>
+          <div class="end">
+            <span class="badge status status-<%= item.status === 'active' ? 'accepted' : 'pending' %>">
+              <%= item.status %></span>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p class="muted" style="margin:0">No listings yet. Run <code>npm run seed</code> to load demo data.</p>
+    <% } %>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

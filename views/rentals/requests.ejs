@@ -1,0 +1,67 @@
+<%- include('/partials/head') %>
+<% const pending = rentals.filter((r) => r.status === 'pending'); %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Lending out</p>
+  <h1>Rental Requests</h1>
+  <p class="lede">Requests members have made for your listings.</p>
+</div>
+
+<div class="wrap">
+  <div class="tabs">
+    <a href="/rentals">My Rentals</a>
+    <a href="/rentals/requests" class="on">Requests for My Items
+      <% if (pending.length) { %><span class="badge badge-gold"><%= pending.length %></span><% } %></a>
+    <a href="/requests">Resale &amp; Donation</a>
+  </div>
+
+  <% if (!rentals.length) { %>
+    <%- include('/partials/empty', {
+      heading: 'No requests yet.',
+      text: "When someone requests one of your items, you'll see it here with their dates.",
+      cta: 'List an Item', href: '/items/new' }) %>
+  <% } else { %>
+    <div class="stack">
+      <% rentals.forEach((r) => { %>
+        <div class="panel panel-tight">
+          <div class="row row-between" style="align-items:flex-start;gap:16px">
+            <div class="row" style="gap:14px;align-items:flex-start;flex:1;min-width:230px">
+              <img src="<%= itemImage(r) %>" alt="" width="66" height="82"
+                   style="width:66px;aspect-ratio:4/5;object-fit:cover;border-radius:8px">
+              <div>
+                <a href="/rentals/<%= r.id %>"><strong><%= r.title %></strong></a>
+                <div class="s muted"><%= prettyDate(r.start_date) %> &ndash; <%= prettyDate(r.end_date) %>
+                  (<%= r.days %> day<%= r.days === 1 ? '' : 's' %>)</div>
+                <div class="s">Requested by <a href="/users/<%= r.renter_id %>"><%= r.renter_name %></a></div>
+                <% if (r.message) { %>
+                  <p class="soft" style="margin:8px 0 0;font-size:.88rem">&ldquo;<%= r.message %>&rdquo;</p>
+                <% } %>
+              </div>
+            </div>
+
+            <div style="text-align:right">
+              <span class="badge status status-<%= r.status %>"><%= r.status %></span>
+              <div class="card-price" style="margin:8px 0"><%= money(r.rental_price) %></div>
+              <div class="row" style="justify-content:flex-end;gap:6px">
+                <% if (r.status === 'pending') { %>
+                  <form method="post" action="/rentals/<%= r.id %>/accept">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-sm" type="submit">Accept</button>
+                  </form>
+                  <form method="post" action="/rentals/<%= r.id %>/reject"
+                        data-confirm="Decline this request?">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-quiet btn-sm" type="submit">Reject</button>
+                  </form>
+                <% } %>
+                <a class="btn btn-quiet btn-sm" href="/rentals/<%= r.id %>">View Request</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('/partials/foot') %>

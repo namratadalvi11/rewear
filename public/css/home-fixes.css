@@ -1,0 +1,91 @@
+/* ==========================================================================
+   Homepage fixes. Loaded after style.css on home.ejs only.
+   - The header stays fixed while scrolling and switches to a cream bar
+     once the hero has scrolled away (is-scrolled, toggled by main.js).
+   - Small-screen layout for the menu, category tiles and trending header.
+   ========================================================================== */
+
+.hero .nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  transition: background-color .3s ease, box-shadow .3s ease, padding .3s ease;
+}
+.hero .nav.is-scrolled {
+  background: rgba(251, 243, 232, .97);
+  box-shadow: 0 2px 14px rgba(59, 36, 24, .12);
+  color: var(--brown);
+  padding-top: 14px; padding-bottom: 14px;
+}
+.hero .nav.is-scrolled .logo,
+.hero .nav.is-scrolled .icons a { color: var(--brown); }
+.hero .nav.is-scrolled .menu {
+  color: var(--brown); border-color: rgba(59, 36, 24, .25); background: rgba(59, 36, 24, .05);
+}
+.hero .nav.is-scrolled .menu a.active { text-decoration: underline; }
+
+/* Give the fixed header room so it never covers the hero title. */
+.hero { padding-top: 0; }
+
+@media (max-width: 900px) {
+  .hero .nav { flex-wrap: wrap; padding: 14px 5% 10px; row-gap: 10px; }
+  .hero .menu {
+    display: flex; order: 3; width: 100%; justify-content: space-between;
+    gap: 6px; padding: .55rem .9rem; font-size: .85rem; white-space: nowrap;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .hero .menu::-webkit-scrollbar { display: none; }
+  .hero .menu li { flex: none; }
+  .hero .icons { gap: .9rem; }
+}
+
+@media (max-width: 700px) {
+  .cats { padding-top: 32px; }
+  .grid4 { gap: 12px; }
+  .card { font-size: 1.2rem; padding: .8rem .9rem; }
+  .card em { font-size: 1rem; }
+  .trend-head h2 { font-size: 1.8rem; }
+  .viewall { position: static; display: inline-block; margin-top: .6rem; }
+  .story-text h2 { font-size: 2rem; }
+}
+
+/* Hero copy on small screens: keep the tagline clear of the feature panel. */
+@media (max-width: 700px) {
+  .hero .tag-right { display: none; }
+  .hero .tag-left { top: 38%; bottom: auto; left: 6%; }
+  .hero .features { bottom: 3%; height: auto; padding: .9rem .6rem; }
+  .hero .features div { gap: .6rem; }
+  .hero .features b { font-size: .88rem; }
+  .hero .features small { font-size: .75rem; }
+  .hero .features svg { width: 26px; height: 26px; }
+}
+
+/* ---------- trending rentals: real item cards ----------------------------- */
+.trend-grid {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.6rem;
+  margin-top: 1.2rem;
+}
+.trend-card {
+  display: block; color: var(--ink); background: #fff; border: 1px solid #e6dccd;
+  border-radius: 16px; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease;
+}
+.trend-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(59, 36, 24, .1); }
+.trend-img {
+  display: block; aspect-ratio: 4 / 5; background-color: #e9dfcf;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.trend-info { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px; }
+.trend-title {
+  font-family: var(--disp); font-size: 1.1rem; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.trend-meta { font-size: .9rem; color: #7a6556; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trend-price { font-size: 1rem; font-weight: 600; margin-top: 2px; }
+.trend-price small { font-weight: 400; color: #7a6556; }
+
+@media (max-width: 1100px) { .trend-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .trend-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; } }
+@media (max-width: 700px) {
+  .trend-grid { gap: .8rem; }
+  .trend-info { padding: 10px 12px 12px; }
+  .trend-title { font-size: 1rem; }
+  .trend-meta { font-size: .8rem; }
+}

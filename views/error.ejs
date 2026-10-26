@@ -1,0 +1,13 @@
+<%- include('/partials/head') %>
+
+<div class="wrap error-page">
+  <div class="code" aria-hidden="true"><%= code %></div>
+  <h1><%= title %></h1>
+  <p class="soft" style="max-width:46ch;margin:0 auto 26px"><%= message %></p>
+  <div class="row" style="justify-content:center">
+    <a class="btn" href="/">Back to home</a>
+    <a class="btn btn-ghost" href="/browse">Browse clothes</a>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

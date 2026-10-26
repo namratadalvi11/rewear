@@ -1,0 +1,10 @@
+<%# Admin navigation. Locals: path (current request path) %>
+<div class="tabs">
+  <a href="/admin" class="<%= path === '/admin' ? 'on' : '' %>">Overview</a>
+  <a href="/admin/users" class="<%= path === '/admin/users' ? 'on' : '' %>">Members</a>
+  <a href="/admin/listings" class="<%= path === '/admin/listings' ? 'on' : '' %>">Listings</a>
+  <a href="/admin/rentals" class="<%= path === '/admin/rentals' ? 'on' : '' %>">Transactions</a>
+  <a href="/admin/reports" class="<%= path === '/admin/reports' ? 'on' : '' %>">Reports</a>
+  <a href="/admin/drives" class="<%= path === '/admin/drives' ? 'on' : '' %>">Donation Drives</a>
+  <a href="/admin/survey" class="<%= path === '/admin/survey' ? 'on' : '' %>">Survey</a>
+</div>

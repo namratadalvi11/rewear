@@ -1,0 +1,39 @@
+<%- include('/partials/head') %>
+
+<div class="wrap wrap-narrow page-head">
+  <p class="eyebrow">Your activity</p>
+  <h1>Notifications</h1>
+  <p class="lede">Requests, bookings, reminders and reviews. Opening this page marks everything as read.</p>
+</div>
+
+<div class="wrap wrap-narrow">
+  <% if (!items.length) { %>
+    <%- include('/partials/empty', {
+      heading: 'Nothing to catch up on.',
+      text: 'When someone requests your item, accepts your booking or leaves a review, it lands here.',
+      cta: 'Browse Clothes', href: '/browse' }) %>
+  <% } else { %>
+    <div class="panel">
+      <% items.forEach((n) => { %>
+        <div class="notif <%= n.read ? '' : 'unread' %>">
+          <span class="mark" aria-hidden="true">&#9671;</span>
+          <div style="flex:1">
+            <div class="row row-between" style="align-items:flex-start;gap:10px">
+              <span>
+                <% if (n.link) { %>
+                  <a href="<%= n.link %>"><%= n.message %></a>
+                <% } else { %>
+                  <%= n.message %>
+                <% } %>
+              </span>
+              <span class="badge"><%= n.type %></span>
+            </div>
+            <div class="s muted"><%= prettyDate(n.created_at.slice(0, 10)) %></div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('/partials/foot') %>

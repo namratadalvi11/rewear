@@ -1,0 +1,120 @@
+<%- include('/partials/head') %>
+<% const basePath = '/donate'; %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Donation Hub</p>
+  <h1><%= heading %></h1>
+  <p class="lede"><%= sub %></p>
+  <div class="row mt">
+    <a class="btn" href="/items/new?type=donate">Donate an Item</a>
+    <a class="btn btn-ghost" href="#drives">See collection drives</a>
+  </div>
+</div>
+
+<div class="wrap collection-tools">
+  <form class="searchbar collection-search" method="get" action="/donate" role="search">
+    <% ['category','gender','occasion','size','condition','location'].forEach((k) => { %>
+      <% if (query[k]) { %><input type="hidden" name="<%= k %>" value="<%= query[k] %>"><% } %>
+    <% }) %>
+    <label class="sr-only" for="q">Search donation items</label>
+    <input type="search" id="q" name="q" value="<%= query.q || '' %>"
+           placeholder="Search clothes, brands, or styles&hellip;">
+    <button class="btn" type="submit">Search</button>
+  </form>
+  <%- include('/partials/collection-tabs', { mode: mode }) %>
+</div>
+
+<div class="wrap">
+  <div class="browse collection-browse">
+    <details class="collection-filter-wrap" open>
+      <summary>Filter collection</summary>
+      <%- include('/partials/filters') %>
+    </details>
+
+    <div class="collection-results">
+      <div class="result-bar">
+        <p class="muted" style="margin:0"><strong><%= total %></strong>
+          item<%= total === 1 ? '' : 's' %> offered for donation</p>
+      </div>
+
+      <% if (items.length) { %>
+        <div class="grid grid-cards">
+          <% items.forEach((item) => { %>
+            <%- include('/partials/item-card', { item: item, mode: 'donate' }) %>
+          <% }) %>
+        </div>
+        <%- include('/partials/pager', { page: page, pages: pages, query: query, basePath: basePath }) %>
+      <% } else { %>
+        <%- include('/partials/empty', {
+          heading: 'No items listed for donation right now.',
+          text: 'If you have wearable clothes you no longer need, listing them takes a minute.',
+          cta: 'Donate an Item', href: '/items/new?type=donate' }) %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- ============ donation drives ============ -->
+<section class="band" id="drives">
+  <div class="wrap">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">Collection drives</p>
+        <h2>Donation Drives</h2>
+      </div>
+      <span class="badge badge-gold">Demo entries</span>
+    </div>
+    <p class="soft" style="max-width:66ch">These drives are placeholder entries created for the
+      project demonstration. Real collection partners can be added by an administrator once the
+      platform is used by an actual community.</p>
+
+    <% if (drives.length) { %>
+      <div class="grid grid-3 mt">
+        <% drives.forEach((d) => { %>
+          <div class="pillar">
+            <% if (d.is_demo) { %><span class="badge badge-gold">Demo organisation</span><% } %>
+            <h3 style="margin-top:10px"><%= d.title %></h3>
+            <p class="muted" style="margin:0 0 8px;font-size:.85rem"><%= d.organization %></p>
+            <p class="soft"><%= d.description %></p>
+            <p class="muted" style="font-size:.84rem;margin:0">
+              <% if (d.location) { %><%= d.location %><br><% } %>
+              <% if (d.starts_on) { %><%= prettyDate(d.starts_on) %>
+                <% if (d.ends_on) { %> &ndash; <%= prettyDate(d.ends_on) %><% } %><% } %>
+            </p>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="muted">No drives listed yet.</p>
+    <% } %>
+  </div>
+</section>
+
+<!-- ============ recent donation activity ============ -->
+<section>
+  <div class="wrap">
+    <div class="panel-head"><h2>Community Donation Activity</h2></div>
+    <% if (activity.length) { %>
+      <div class="panel">
+        <% activity.forEach((a) => { %>
+          <div class="mini">
+            <div>
+              <div class="t"><%= a.title %></div>
+              <div class="s"><%= a.category %> &middot; offered by <%= a.donor %></div>
+            </div>
+            <div class="end">
+              <span class="badge status status-<%= a.status === 'donated' ? 'completed' : 'pending' %>">
+                <%= a.status === 'donated' ? 'Donated' : 'Listed' %>
+              </span>
+              <div class="s"><%= prettyDate(a.created_at.slice(0, 10)) %></div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="muted">Donation activity will show up here as members list items.</p>
+    <% } %>
+  </div>
+</section>
+
+<%- include('/partials/foot') %>

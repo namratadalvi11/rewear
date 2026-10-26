@@ -1,0 +1,87 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="link-quiet"><a href="/orders">&larr; Back to my orders</a></p>
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Resale order #<%= order.id %></p>
+      <h1 style="font-size:clamp(1.6rem,3vw,2.2rem)"><%= order.title %></h1>
+    </div>
+    <span class="badge status status-<%= order.status %>"><%= order.status %></span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="dash-grid">
+    <section class="panel">
+      <div class="panel-head"><h2 style="font-size:1.2rem">Order details</h2></div>
+      <div class="mini">
+        <img src="<%= itemImage(order) %>" alt="">
+        <div>
+          <a class="t" href="/items/<%= order.item_id %>"><%= order.title %></a>
+          <div class="s"><%= order.category %> · Size <%= order.size %> · <%= order.condition %></div>
+          <div class="s">Local handover: <%= order.item_location %></div>
+        </div>
+      </div>
+      <dl class="specs">
+        <div><dt>Order reference</dt><dd>#<%= order.id %></dd></div>
+        <div><dt>Order date</dt><dd><%= prettyDate(order.created_at.slice(0, 10)) %></dd></div>
+        <div><dt>Order total</dt><dd><%= money(order.sale_price) %></dd></div>
+        <div><dt>Status</dt><dd><%= order.status %></dd></div>
+      </dl>
+      <p class="hint" role="note">
+        <strong>Demo payment mode:</strong> no payment was collected or processed. Arrange payment
+        and local handover directly with the other member.
+      </p>
+      <% if (canSeeContact) { %>
+        <p class="soft mt"><strong><%= isSeller ? 'Buyer' : 'Seller' %>:</strong>
+          <%= isSeller ? order.buyer_name : order.seller_name %>
+          · <%= isSeller ? order.buyer_phone : order.seller_phone %></p>
+      <% } else { %>
+        <p class="muted mt">Contact details are shared after the seller accepts the order.</p>
+      <% } %>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-head"><h2 style="font-size:1.2rem">Next steps</h2></div>
+      <% if (isSeller && order.status === 'pending') { %>
+        <form method="post" action="/orders/<%= order.id %>/status">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="action" value="accept">
+          <button class="btn btn-block" type="submit">Accept order</button>
+        </form>
+      <% } else if (isSeller && order.status === 'accepted') { %>
+        <p class="soft">Coordinate the local handover with the buyer, then update the status.</p>
+        <form method="post" action="/orders/<%= order.id %>/status">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="action" value="ready">
+          <button class="btn btn-block" type="submit">Ready for handover</button>
+        </form>
+      <% } else if (isSeller && order.status === 'ready') { %>
+        <p class="soft">Mark the order complete once the item has been handed over.</p>
+        <form method="post" action="/orders/<%= order.id %>/status">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="action" value="complete">
+          <button class="btn btn-block" type="submit">Mark handed over</button>
+        </form>
+      <% } else if (order.status === 'completed') { %>
+        <p class="soft">This order is complete. Thank you for keeping clothing in use.</p>
+      <% } else if (order.status === 'cancelled') { %>
+        <p class="soft">This order was cancelled. The listing is available again if the seller chooses to relist it.</p>
+      <% } else { %>
+        <p class="soft">The seller will review your order and update its status here.</p>
+      <% } %>
+
+      <% if (['pending', 'accepted'].includes(order.status)) { %>
+        <form method="post" action="/orders/<%= order.id %>/status" class="mt"
+              data-confirm="Cancel this order? No payment has been collected.">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="action" value="cancel">
+          <button class="btn btn-quiet btn-block" type="submit">Cancel order</button>
+        </form>
+      <% } %>
+    </aside>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

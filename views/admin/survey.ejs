@@ -1,0 +1,53 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Administration</p>
+  <h1>Survey Results</h1>
+  <p class="lede"><%= total %> response<%= total === 1 ? '' : 's' %> collected. Answers are stored
+    without names or emails.</p>
+</div>
+
+<div class="wrap">
+  <%- include('/partials/admin-tabs') %>
+
+  <% if (!total) { %>
+    <%- include('/partials/empty', {
+      heading: 'No responses yet.',
+      text: 'Share the survey with the community to start collecting responses.',
+      cta: 'Open the survey', href: '/community/survey' }) %>
+  <% } else { %>
+    <div class="grid grid-2">
+      <% summary.forEach((q, i) => { %>
+        <div class="panel">
+          <p class="eyebrow">Question <%= i + 1 %></p>
+          <h2 style="font-size:1.1rem"><%= q.text %></h2>
+          <% const maxN = Math.max(1, ...q.counts.map((c) => c.n)); %>
+          <% const answered = q.counts.reduce((s, c) => s + c.n, 0); %>
+          <div class="bars mt">
+            <% q.counts.forEach((c) => { %>
+              <div class="bar-row">
+                <span><%= c.option %></span>
+                <span class="bar-track">
+                  <span class="bar-fill" style="width:<%= Math.round((c.n / maxN) * 100) %>%"></span>
+                </span>
+                <span class="v"><%= c.n %></span>
+              </div>
+            <% }) %>
+          </div>
+          <p class="hint"><%= answered %> of <%= total %> respondents answered this question.</p>
+        </div>
+      <% }) %>
+    </div>
+
+    <% if (comments.length) { %>
+      <div class="panel mt">
+        <div class="panel-head"><h2 style="font-size:1.2rem">Written comments</h2></div>
+        <% comments.forEach((c) => { %>
+          <div class="mini"><div><p class="soft" style="margin:0">&ldquo;<%= c %>&rdquo;</p></div></div>
+        <% }) %>
+      </div>
+    <% } %>
+  <% } %>
+</div>
+
+<%- include('/partials/foot') %>

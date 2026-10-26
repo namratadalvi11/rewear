@@ -1,0 +1,74 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Administration</p>
+  <h1>Reports</h1>
+  <p class="lede">Reports raised by members about listings or other members. Open reports come first.</p>
+</div>
+
+<div class="wrap">
+  <%- include('/partials/admin-tabs') %>
+
+  <% if (!reports.length) { %>
+    <%- include('/partials/empty', {
+      heading: 'No reports.',
+      text: 'Nothing has been reported by members. Reports raised from a listing or a profile appear here.' }) %>
+  <% } else { %>
+    <div class="stack">
+      <% reports.forEach((r) => { %>
+        <div class="panel panel-tight">
+          <div class="row row-between" style="align-items:flex-start;gap:16px">
+            <div style="flex:1;min-width:240px">
+              <div class="row" style="gap:8px">
+                <span class="badge badge-danger"><%= r.reason %></span>
+                <span class="badge status status-<%= r.status === 'open' ? 'pending'
+                  : (r.status === 'reviewed' ? 'completed' : 'rejected') %>"><%= r.status %></span>
+                <span class="muted s"><%= prettyDate(r.created_at.slice(0, 10)) %></span>
+              </div>
+              <p style="margin:10px 0 4px">
+                Reported by <a href="/users/<%= r.reporter_id %>"><%= r.reporter_name %></a>
+                <% if (r.item_title) { %> about listing
+                  <a href="/items/<%= r.item_id %>"><%= r.item_title %></a><% } %>
+                <% if (r.user_name) { %> &middot; member
+                  <a href="/users/<%= r.user_id %>"><%= r.user_name %></a><% } %>
+              </p>
+              <% if (r.description) { %>
+                <p class="soft" style="margin:0">&ldquo;<%= r.description %>&rdquo;</p>
+              <% } %>
+            </div>
+            <div class="row" style="justify-content:flex-end;gap:6px">
+              <% if (r.item_id) { %>
+                <form method="post" action="/admin/listings/<%= r.item_id %>/remove"
+                      data-confirm="Remove the reported listing?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="back" value="/admin/reports">
+                  <button class="btn btn-danger btn-sm" type="submit">Remove listing</button>
+                </form>
+              <% } %>
+              <% if (r.status === 'open') { %>
+                <form method="post" action="/admin/reports/<%= r.id %>/status">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="status" value="reviewed">
+                  <button class="btn btn-sm" type="submit">Mark reviewed</button>
+                </form>
+                <form method="post" action="/admin/reports/<%= r.id %>/status">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="status" value="dismissed">
+                  <button class="btn btn-quiet btn-sm" type="submit">Dismiss</button>
+                </form>
+              <% } else { %>
+                <form method="post" action="/admin/reports/<%= r.id %>/status">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="status" value="open">
+                  <button class="btn btn-quiet btn-sm" type="submit">Reopen</button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('/partials/foot') %>

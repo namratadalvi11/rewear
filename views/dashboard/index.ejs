@@ -1,0 +1,169 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head dashboard-head">
+  <p class="eyebrow">Dashboard</p>
+  <h1>Hello, <%= user.name.split(' ')[0] %>.</h1>
+  <p class="lede">
+    <% if (user.verification === 'verified') { %>
+      Your account is verified, so you can rent, list and request items freely.
+    <% } else if (user.verification === 'pending') { %>
+      Your verification request is with an admin. You can browse in the meantime.
+    <% } else { %>
+      Get verified to start renting and listing &mdash; it takes one short form.
+    <% } %>
+  </p>
+  <div class="row">
+    <% if (user.verification !== 'verified') { %>
+      <a class="btn" href="/profile/verify">Get verified</a>
+    <% } %>
+    <span class="badge badge-<%= user.verification === 'verified' ? 'verified'
+      : (user.verification === 'pending' ? 'pending' : '') %>">
+      <%= user.verification === 'verified' ? '✓ Verified member'
+        : (user.verification === 'pending' ? 'Verification pending' : 'Not verified') %>
+    </span>
+    <% if (rating.n) { %>
+      <span class="badge badge-gold"><%= stars(rating.avg) %> <%= rating.avg %> from <%= rating.n %> review<%= rating.n === 1 ? '' : 's' %></span>
+    <% } %>
+  </div>
+</div>
+
+<div class="wrap dashboard-content">
+  <!-- ---------- return reminder ---------- -->
+  <% if (dueSoon.length) { %>
+    <div class="flash flash-error mb" role="status" style="margin-top:0">
+      <span>
+        <strong>Return reminder:</strong>
+        <% dueSoon.forEach((d, i) => { %>
+          <a href="/rentals/<%= d.id %>"><%= d.title %></a> is due back on
+          <%= prettyDate(d.end_date) %><%= i < dueSoon.length - 1 ? '; ' : '.' %>
+        <% }) %>
+      </span>
+    </div>
+  <% } %>
+
+  <!-- ---------- stats ---------- -->
+  <div class="tiles mb">
+    <div class="tile accent"><div class="n"><%= stats.active %></div><div class="l">Active rentals</div></div>
+    <div class="tile"><div class="n"><%= stats.upcoming %></div><div class="l">Upcoming bookings</div></div>
+    <div class="tile"><div class="n"><%= stats.listings %></div><div class="l">My listings</div></div>
+    <div class="tile"><div class="n"><%= stats.pending %></div><div class="l">Pending requests</div></div>
+    <div class="tile"><div class="n"><%= stats.completed %></div><div class="l">Completed rentals</div></div>
+    <div class="tile"><div class="n"><%= stats.orders %></div><div class="l">Resale orders</div></div>
+  </div>
+
+  <!-- ---------- quick actions ---------- -->
+  <div class="quick-actions mb">
+    <a class="btn btn-quiet" href="/browse">Browse Clothes</a>
+    <a class="btn btn-quiet" href="/items/new">List an Item</a>
+    <a class="btn btn-quiet" href="/rentals">My Rentals</a>
+    <a class="btn btn-quiet" href="/orders">Resale Orders</a>
+    <a class="btn btn-quiet" href="/donate">Donation Hub</a>
+  </div>
+
+  <div class="dash-grid">
+    <div class="stack">
+      <!-- ---------- upcoming rentals ---------- -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2 style="font-size:1.2rem">Upcoming rentals</h2>
+          <a class="link-quiet" href="/rentals">See all &rarr;</a>
+        </div>
+        <% if (upcoming.length) { %>
+          <% upcoming.forEach((r) => { %>
+            <div class="mini">
+              <img src="<%= itemImage(r) %>" alt="">
+              <div>
+                <a href="/rentals/<%= r.id %>" class="t"><%= r.title %></a>
+                <div class="s"><%= prettyDate(r.start_date) %> &ndash; <%= prettyDate(r.end_date) %>
+                  &middot; from <%= r.owner_name %></div>
+              </div>
+              <div class="end"><span class="badge status status-<%= r.status %>"><%= r.status %></span></div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p class="muted" style="margin:0">Nothing booked yet.
+            <a href="/browse">Explore the community wardrobe</a>.</p>
+        <% } %>
+      </div>
+
+      <!-- ---------- requests to answer ---------- -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2 style="font-size:1.2rem">Requests waiting on you</h2>
+          <a class="link-quiet" href="/rentals/requests">See all &rarr;</a>
+        </div>
+        <% if (requests.length) { %>
+          <% requests.forEach((r) => { %>
+            <div class="mini">
+              <img src="<%= itemImage(r) %>" alt="">
+              <div>
+                <a href="/rentals/<%= r.id %>" class="t"><%= r.title %></a>
+                <div class="s"><%= r.renter_name %> &middot; <%= prettyDate(r.start_date) %>
+                  &ndash; <%= prettyDate(r.end_date) %></div>
+              </div>
+              <div class="end">
+                <form method="post" action="/rentals/<%= r.id %>/accept">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn btn-sm" type="submit">Accept</button>
+                </form>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p class="muted" style="margin:0">No requests yet. When someone requests your item,
+            you&rsquo;ll see it here.</p>
+        <% } %>
+        <% if (stats.enquiries) { %>
+          <p class="mt" style="margin-bottom:0"><a href="/requests"><strong><%= stats.enquiries %></strong>
+            resale or donation enquir<%= stats.enquiries === 1 ? 'y' : 'ies' %> waiting</a></p>
+        <% } %>
+      </div>
+
+      <!-- ---------- my listings ---------- -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2 style="font-size:1.2rem">My listings</h2>
+          <a class="link-quiet" href="/my-listings">Manage &rarr;</a>
+        </div>
+        <% if (listings.length) { %>
+          <div class="grid grid-cards">
+            <% listings.forEach((item) => { %>
+              <%- include('/partials/item-card', { item: item, mode: item.listing_type }) %>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="muted" style="margin:0">You haven&rsquo;t listed anything yet.
+            <a href="/items/new">Give your unused clothes another life</a>.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- ---------- activity ---------- -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2 style="font-size:1.2rem">Recent activity</h2>
+        <a class="link-quiet" href="/notifications">All &rarr;</a>
+      </div>
+      <% if (activity.length) { %>
+        <% activity.forEach((n) => { %>
+          <div class="notif <%= n.read ? '' : 'unread' %>">
+            <span class="mark" aria-hidden="true">&#9671;</span>
+            <div>
+              <% if (n.link) { %>
+                <a href="<%= n.link %>"><%= n.message %></a>
+              <% } else { %>
+                <span><%= n.message %></span>
+              <% } %>
+              <div class="s muted"><%= prettyDate(n.created_at.slice(0, 10)) %></div>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p class="muted" style="margin:0">Nothing has happened yet. Activity on your listings and
+          bookings will appear here.</p>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

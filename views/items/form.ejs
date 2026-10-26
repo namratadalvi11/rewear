@@ -1,0 +1,246 @@
+<%- include('/partials/head') %>
+<%
+  const editing = !!(item && item.id);
+  const v = (k) => (item && item[k] != null ? item[k] : '');
+  const m = item ? json(item.measurements, {}) : {};
+  const existing = item && item.images ? json(item.images, []) : [];
+  const picked = editing ? item.listing_type : type;
+%>
+
+<div class="wrap wrap-narrow page-head">
+  <p class="eyebrow"><%= editing ? 'Edit listing' : 'List an item' %></p>
+  <h1><%= editing ? 'Update your listing' : 'Give your clothes another life' %></h1>
+  <p class="lede">Accurate details and honest condition notes are what make community renting work.</p>
+</div>
+
+<div class="wrap wrap-narrow">
+  <% if (errors.length) { %>
+    <div class="errors" role="alert">
+      <ul><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul>
+    </div>
+  <% } %>
+
+  <form method="post" enctype="multipart/form-data"
+        action="<%= editing ? '/items/' + item.id + '/edit' : '/items' %>" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <!-- ---------- listing type ---------- -->
+    <fieldset>
+      <legend>What do you want to do?</legend>
+      <% if (editing) { %>
+        <input type="hidden" name="listing_type" value="<%= picked %>">
+        <p class="soft" style="margin:0">This listing is for
+          <strong><%= picked === 'rent' ? 'renting out' : (picked === 'sell' ? 'selling' : 'donating') %></strong>.
+          To change that, create a new listing instead.</p>
+      <% } else { %>
+        <div class="chips">
+          <% [['rent','Rent it out'],['sell','Sell it'],['donate','Donate it']].forEach(([val, label]) => { %>
+            <label class="chip">
+              <input type="radio" name="listing_type" value="<%= val %>"
+                     <%= picked === val ? 'checked' : '' %>> <%= label %>
+            </label>
+          <% }) %>
+        </div>
+        <p class="hint">Renting is the main way ReWear is used, but selling and donating work the same way.</p>
+      <% } %>
+    </fieldset>
+
+    <!-- ---------- the item ---------- -->
+    <fieldset>
+      <legend>The item</legend>
+      <div class="field">
+        <label for="title">Item name</label>
+        <input type="text" id="title" name="title" value="<%= v('title') %>" required
+               placeholder="e.g. Maroon Banarasi silk saree">
+      </div>
+
+      <div class="field">
+        <label for="brand">Brand <span class="muted">(optional)</span></label>
+        <input type="text" id="brand" name="brand" value="<%= v('brand') %>" maxlength="80"
+               placeholder="e.g. Fabindia">
+      </div>
+
+      <div class="field">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" required
+                  placeholder="Fabric, fit, how many times it has been worn, anything a renter should know."><%= v('description') %></textarea>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="category">Category</label>
+          <select id="category" name="category" required>
+            <option value="">Choose&hellip;</option>
+            <% CATEGORIES.forEach((c) => { %>
+              <option value="<%= c %>" <%= v('category') === c ? 'selected' : '' %>><%= c %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="gender">Who is it for?</label>
+          <select id="gender" name="gender" required>
+            <option value="">Choose&hellip;</option>
+            <% GENDERS.forEach((g) => { %>
+              <option value="<%= g %>" <%= v('gender') === g ? 'selected' : '' %>><%= g %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="occasion">Occasion</label>
+          <select id="occasion" name="occasion">
+            <option value="">Any / not specific</option>
+            <% OCCASIONS.forEach((o) => { %>
+              <option value="<%= o %>" <%= v('occasion') === o ? 'selected' : '' %>><%= o %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="condition">Condition</label>
+          <select id="condition" name="condition" required>
+            <option value="">Choose&hellip;</option>
+            <% CONDITIONS.forEach((c) => { %>
+              <option value="<%= c %>" <%= v('condition') === c ? 'selected' : '' %>><%= c %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="accessories">Anything included with it? <span class="muted">(optional)</span></label>
+        <input type="text" id="accessories" name="accessories" value="<%= v('accessories') %>"
+               placeholder="e.g. matching blouse, dupatta, belt, garment bag">
+      </div>
+    </fieldset>
+
+    <!-- ---------- size & measurements ---------- -->
+    <fieldset>
+      <legend>Size and measurements</legend>
+      <div class="field">
+        <label for="size">Size</label>
+        <select id="size" name="size" required>
+          <option value="">Choose&hellip;</option>
+          <% SIZES.forEach((s) => { %>
+            <option value="<%= s %>" <%= v('size') === s ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+        <p class="hint">Labels vary between brands, so please fill in the real measurements too.</p>
+      </div>
+
+      <div class="form-grid-3">
+        <div class="field"><label for="chest">Chest / bust (in)</label>
+          <input type="text" id="chest" name="chest" value="<%= m.chest || '' %>" placeholder="38"></div>
+        <div class="field"><label for="waist">Waist (in)</label>
+          <input type="text" id="waist" name="waist" value="<%= m.waist || '' %>" placeholder="32"></div>
+        <div class="field"><label for="length">Length (in)</label>
+          <input type="text" id="length" name="length" value="<%= m.length || '' %>" placeholder="44"></div>
+        <div class="field"><label for="shoulder">Shoulder (in)</label>
+          <input type="text" id="shoulder" name="shoulder" value="<%= m.shoulder || '' %>" placeholder="17"></div>
+        <div class="field"><label for="sleeve">Sleeve (in)</label>
+          <input type="text" id="sleeve" name="sleeve" value="<%= m.sleeve || '' %>" placeholder="23"></div>
+        <div class="field"><label for="other">Other</label>
+          <input type="text" id="other" name="other" value="<%= m.other || '' %>" placeholder="Hip 40"></div>
+      </div>
+    </fieldset>
+
+    <!-- ---------- rent-only fields ---------- -->
+    <fieldset data-for="rent">
+      <legend>Rental terms</legend>
+      <div class="form-grid">
+        <div class="field">
+          <label for="rental_price">Rent per day (<%= '₹' %>)</label>
+          <input type="number" id="rental_price" name="rental_price" min="1" step="10"
+                 value="<%= v('rental_price') || '' %>" data-required placeholder="250">
+        </div>
+        <div class="field">
+          <label for="security_deposit">Refundable security deposit (<%= '₹' %>)</label>
+          <input type="number" id="security_deposit" name="security_deposit" min="0" step="50"
+                 value="<%= v('security_deposit') || '' %>" placeholder="1000">
+          <p class="hint">Collected and returned directly between members.</p>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="available_from">Available from</label>
+          <input type="date" id="available_from" name="available_from" value="<%= v('available_from') %>">
+        </div>
+        <div class="field">
+          <label for="available_to">Available until</label>
+          <input type="date" id="available_to" name="available_to" value="<%= v('available_to') %>">
+        </div>
+      </div>
+      <p class="hint">Leave the dates empty if the item is generally available all year.</p>
+    </fieldset>
+
+    <!-- ---------- sell-only fields ---------- -->
+    <fieldset data-for="sell">
+      <legend>Sale details</legend>
+      <div class="field" style="max-width:280px">
+        <label for="sale_price">Asking price (<%= '₹' %>)</label>
+        <input type="number" id="sale_price" name="sale_price" min="1" step="50"
+               value="<%= v('sale_price') || '' %>" data-required placeholder="1200">
+      </div>
+      <div class="field" style="max-width:280px">
+        <label for="original_price">Original price (<%= '₹' %>) <span class="muted">(optional)</span></label>
+        <input type="number" id="original_price" name="original_price" min="0" step="50"
+               value="<%= v('original_price') || '' %>" placeholder="2500">
+      </div>
+      <p class="hint">ReWear does not process payments. Buyers send an enquiry and you settle it
+        between yourselves at handover.</p>
+    </fieldset>
+
+    <!-- ---------- donate-only fields ---------- -->
+    <fieldset data-for="donate">
+      <legend>Donation details</legend>
+      <div class="field" style="max-width:280px">
+        <label for="quantity">Number of garments</label>
+        <input type="number" id="quantity" name="quantity" min="1" max="100"
+               value="<%= v('quantity') || 1 %>" data-required>
+      </div>
+      <div class="field">
+        <label for="handover_method">Preferred handover</label>
+        <input type="text" id="handover_method" name="handover_method" value="<%= v('handover_method') %>"
+               placeholder="e.g. Collection from my locality, or drop-off at a college drive">
+      </div>
+      <p class="hint">Please only list clothes that are genuinely wearable.</p>
+    </fieldset>
+
+    <!-- ---------- location & photos ---------- -->
+    <fieldset>
+      <legend>Location and photos</legend>
+      <div class="field">
+        <label for="location">Locality for handover</label>
+        <input type="text" id="location" name="location" value="<%= v('location') || (user ? user.location : '') %>"
+               required placeholder="e.g. Kothrud, Pune">
+        <p class="hint">Only the locality is shown publicly, never your full address.</p>
+      </div>
+
+      <% if (existing.length) { %>
+        <div class="field">
+          <label>Current photos</label>
+          <div class="record-photos">
+            <% existing.forEach((src) => { %><img src="<%= src %>" alt=""><% }) %>
+          </div>
+          <p class="hint">New uploads are added to these.</p>
+        </div>
+      <% } %>
+
+      <div class="field">
+        <label for="images">Photos <span class="muted">(up to 6, max 4&nbsp;MB each)</span></label>
+        <input type="file" id="images" name="images" accept="image/*" multiple data-preview>
+        <p class="hint">Natural light, front and back, plus a close-up of any mark. If you skip photos
+          a placeholder is shown instead.</p>
+        <div class="record-photos" id="preview"></div>
+      </div>
+    </fieldset>
+
+    <div class="row">
+      <button class="btn" type="submit"><%= editing ? 'Save changes' : 'Publish listing' %></button>
+      <a class="btn btn-quiet" href="<%= editing ? '/items/' + item.id : '/my-listings' %>">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<%- include('/partials/foot') %>

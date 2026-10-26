@@ -1,0 +1,102 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Your wardrobe on ReWear</p>
+      <h1>My Listings</h1>
+    </div>
+    <a class="btn" href="/items/new">List an Item</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <% if (!items.length) { %>
+    <%- include('/partials/empty', {
+      heading: "You haven't listed anything yet.",
+      text: 'Give your unused clothes another life. A listing takes about two minutes.',
+      cta: 'List an Item', href: '/items/new' }) %>
+  <% } else { %>
+    <div class="stack">
+      <% items.forEach((item) => { %>
+        <div class="panel panel-tight">
+          <div class="row row-between" style="align-items:flex-start;gap:16px">
+            <div class="row" style="gap:14px;align-items:flex-start;flex:1;min-width:220px">
+              <img src="<%= itemImage(item) %>" alt="" width="72" height="90"
+                   style="width:72px;aspect-ratio:4/5;object-fit:cover;border-radius:8px">
+              <div>
+                <a href="/items/<%= item.id %>"><strong><%= item.title %></strong></a>
+                <div class="row" style="gap:6px;margin-top:6px">
+                  <span class="badge"><%= item.listing_type === 'rent' ? 'Rent'
+                    : (item.listing_type === 'sell' ? 'Sale' : 'Donation') %></span>
+                  <span class="badge status status-<%= item.status === 'active' ? 'accepted'
+                    : (item.status === 'paused' ? 'pending' : 'completed') %>"><%= item.status %></span>
+                  <span class="badge"><%= item.category %> &middot; <%= item.size %></span>
+                </div>
+                <p class="muted" style="margin:8px 0 0;font-size:.84rem">
+                  <%= item.views %> views &middot; <%= item.bookings %> booking<%= item.bookings === 1 ? '' : 's' %>
+                  <% if (item.pending) { %>
+                    &middot; <a href="/rentals/requests"><strong><%= item.pending %> pending request<%= item.pending === 1 ? '' : 's' %></strong></a>
+                  <% } %>
+                  <% if (item.enquiries) { %>
+                    &middot; <a href="/requests"><strong><%= item.enquiries %> enquir<%= item.enquiries === 1 ? 'y' : 'ies' %></strong></a>
+                  <% } %>
+                </p>
+              </div>
+            </div>
+
+            <div style="text-align:right">
+              <div class="card-price" style="margin-bottom:8px">
+                <% if (item.listing_type === 'rent') { %><%= money(item.rental_price) %><small>/day</small>
+                <% } else if (item.listing_type === 'sell') { %><%= money(item.sale_price) %>
+                <% } else { %>Free<% } %>
+              </div>
+              <div class="row" style="justify-content:flex-end;gap:6px">
+                <a class="btn btn-quiet btn-sm" href="/items/<%= item.id %>/edit">Edit</a>
+
+                <% if (item.listing_type === 'rent') { %>
+                  <a class="btn btn-quiet btn-sm" href="/rentals/requests">Requests</a>
+                <% } else { %>
+                  <a class="btn btn-quiet btn-sm" href="/requests">Enquiries</a>
+                <% } %>
+
+                <% if (item.status === 'active' || item.status === 'paused') { %>
+                  <form method="post" action="/items/<%= item.id %>/status">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="status" value="<%= item.status === 'paused' ? 'active' : 'paused' %>">
+                    <button class="btn btn-quiet btn-sm" type="submit">
+                      <%= item.status === 'paused' ? 'Resume' : 'Pause' %>
+                    </button>
+                  </form>
+                <% } %>
+
+                <% if (item.listing_type === 'sell' && item.status === 'active') { %>
+                  <form method="post" action="/items/<%= item.id %>/status">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="status" value="sold">
+                    <button class="btn btn-quiet btn-sm" type="submit">Mark sold</button>
+                  </form>
+                <% } %>
+                <% if (item.listing_type === 'donate' && item.status === 'active') { %>
+                  <form method="post" action="/items/<%= item.id %>/status">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="status" value="donated">
+                    <button class="btn btn-quiet btn-sm" type="submit">Mark donated</button>
+                  </form>
+                <% } %>
+
+                <form method="post" action="/items/<%= item.id %>/delete"
+                      data-confirm="Delete &quot;<%= item.title %>&quot;? This cannot be undone.">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('/partials/foot') %>

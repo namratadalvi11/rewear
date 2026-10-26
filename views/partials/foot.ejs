@@ -1,0 +1,86 @@
+</main>
+
+<nav class="mobile-bottom-nav" aria-label="Quick navigation">
+  <a href="/" class="<%= path === '/' ? 'on' : '' %>"
+     <% if (path === '/') { %>aria-current="page"<% } %>>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"></path></svg>
+    <span>Home</span>
+  </a>
+  <a href="/explore" class="<%= path === '/explore' ? 'on' : '' %>"
+     <% if (path === '/explore') { %>aria-current="page"<% } %>>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m16 16 4.2 4.2"></path></svg>
+    <span>Explore</span>
+  </a>
+  <a href="<%= user ? '/wishlist' : '/login' %>"
+     class="<%= path === '/wishlist' ? 'on' : '' %>"
+     <% if (path === '/wishlist') { %>aria-current="page"<% } %>>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.5-8.8 11-8.8 11s-8.8-5.5-8.8-11A4.8 4.8 0 0 1 12 6.3a4.8 4.8 0 0 1 8.8 2.5Z"></path></svg>
+    <span>Wishlist</span>
+  </a>
+  <a href="<%= user ? '/dashboard' : '/login' %>"
+     class="<%= ['/dashboard', '/profile'].includes(path) ? 'on' : '' %>"
+     <% if (['/dashboard', '/profile'].includes(path)) { %>aria-current="page"<% } %>>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.3"></circle><path d="M5.5 20c.4-3.3 2.8-5.2 6.5-5.2s6.1 1.9 6.5 5.2"></path></svg>
+    <span><%= user ? 'Account' : 'Log in' %></span>
+  </a>
+</nav>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="logo" href="/">
+          <span class="logo-mark" aria-hidden="true">R</span>
+          RE<span class="wear">WEAR</span>
+        </a>
+        <p style="margin-top:14px;max-width:34ch">Wear More. Waste Less. A community platform for
+          renting, reselling and donating clothes that would otherwise sit unused.</p>
+        <p class="badge badge-gold">Community Engagement Project</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="/browse">Browse Rentals</a></li>
+          <li><a href="/cart">Rental Cart</a></li>
+          <li><a href="/resale">Resale Hub</a></li>
+          <li><a href="/donate">Donation Hub</a></li>
+          <li><a href="/items/new">List an Item</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Learn</h4>
+        <ul>
+          <li><a href="/how-it-works">How It Works</a></li>
+          <li><a href="/about">About ReWear</a></li>
+          <li><a href="/community">Community Impact</a></li>
+          <li><a href="/community/survey">Community Survey</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Account</h4>
+        <ul>
+          <% if (user) { %>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/my-listings">My Listings</a></li>
+            <li><a href="/rentals">My Rentals</a></li>
+            <li><a href="/cart">Rental Cart</a></li>
+            <li><a href="/orders">Resale Orders</a></li>
+            <li><a href="/reviews">Reviews</a></li>
+            <% if (user.role === 'admin') { %><li><a href="/admin">Admin</a></li><% } %>
+          <% } else { %>
+            <li><a href="/register">Create Account</a></li>
+            <li><a href="/login">Log in</a></li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>ReWear · Student community project · Demo data only</span>
+      <span>Handover happens locally between members. Personal contact details stay private until a booking is confirmed.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js?v=20261013-ui"></script>
+</body>
+</html>

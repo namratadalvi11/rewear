@@ -1,0 +1,159 @@
+<%- include('/partials/head') %>
+<% const isMe = user && user.id === person.id; %>
+
+<div class="wrap page-head">
+  <div class="panel">
+    <div class="row row-between" style="align-items:flex-start;gap:20px">
+      <div class="owner-box">
+        <% if (person.profile_image) { %>
+          <img class="avatar" src="<%= person.profile_image %>" alt="" style="width:72px;height:72px">
+        <% } else { %>
+          <span class="avatar avatar-fallback" aria-hidden="true"
+                style="width:72px;height:72px;font-size:1.5rem"><%= person.name.charAt(0).toUpperCase() %></span>
+        <% } %>
+        <div>
+          <h1 style="font-size:1.8rem;margin-bottom:6px"><%= person.name %></h1>
+          <div class="row" style="gap:8px">
+            <% if (person.verification === 'verified') { %>
+              <span class="badge badge-verified">&#10003; Verified community member</span>
+            <% } else { %>
+              <span class="badge">Not yet verified</span>
+            <% } %>
+            <% if (person.role === 'admin') { %><span class="badge badge-ink">Admin</span><% } %>
+          </div>
+          <p class="muted" style="margin:10px 0 0;font-size:.9rem">
+            <%= person.location %>
+            <% if (person.college) { %> &middot; <%= person.college %><% } %>
+            &middot; Member since <%= prettyDate(person.created_at.slice(0, 10)) %>
+          </p>
+        </div>
+      </div>
+
+      <div style="text-align:right">
+        <% if (rating.n) { %>
+          <div class="stars" style="font-size:1.1rem"><%= stars(rating.avg) %></div>
+          <p class="muted" style="margin:4px 0 0;font-size:.86rem"><%= rating.avg %> from
+            <%= rating.n %> review<%= rating.n === 1 ? '' : 's' %></p>
+        <% } else { %>
+          <p class="muted" style="margin:0;font-size:.86rem">No reviews yet</p>
+        <% } %>
+        <p class="muted" style="margin:6px 0 0;font-size:.86rem"><%= completed %> completed
+          transaction<%= completed === 1 ? '' : 's' %></p>
+        <% if (isMe) { %>
+          <a class="btn btn-quiet btn-sm mt" href="/profile">Edit profile</a>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (person.bio) { %>
+      <p class="soft" style="margin:18px 0 0;max-width:70ch"><%= person.bio %></p>
+    <% } %>
+    <p class="hint" style="margin:14px 0 0">Phone number and exact address are never shown on a
+      profile. They are shared only with the other member once a booking is confirmed.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="tabs">
+    <a href="/users/<%= person.id %>?tab=listings" class="<%= tab === 'listings' ? 'on' : '' %>">
+      Listings <span class="muted">(<%= listings.length %>)</span></a>
+    <a href="/users/<%= person.id %>?tab=history" class="<%= tab === 'history' ? 'on' : '' %>">
+      Rental history <span class="muted">(<%= history.length %>)</span></a>
+    <a href="/users/<%= person.id %>?tab=reviews" class="<%= tab === 'reviews' ? 'on' : '' %>">
+      Reviews <span class="muted">(<%= reviews.length %>)</span></a>
+  </div>
+
+  <!-- ---------- listings ---------- -->
+  <% if (tab === 'listings') { %>
+    <% if (listings.length) { %>
+      <div class="grid grid-cards">
+        <% listings.forEach((item) => { %>
+          <%- include('/partials/item-card', { item: item, mode: item.listing_type }) %>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <%- include('/partials/empty', {
+        heading: 'No active listings.',
+        text: isMe ? 'Give your unused clothes another life.' : 'This member has nothing listed at the moment.',
+        cta: isMe ? 'List an Item' : 'Browse Clothes', href: isMe ? '/items/new' : '/browse' }) %>
+    <% } %>
+  <% } %>
+
+  <!-- ---------- rental history ---------- -->
+  <% if (tab === 'history') { %>
+    <% if (history.length) { %>
+      <div class="panel">
+        <% history.forEach((r) => { %>
+          <div class="mini">
+            <div>
+              <div class="t"><%= r.title %></div>
+              <div class="s"><%= prettyDate(r.start_date) %> &ndash; <%= prettyDate(r.end_date) %>
+                &middot; <%= r.owner_id === person.id ? 'lent out' : 'rented' %></div>
+            </div>
+            <div class="end"><span class="badge status status-completed">completed</span></div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <%- include('/partials/empty', {
+        heading: 'No completed rentals yet.',
+        text: 'Completed bookings appear here and build up a reliability record over time.' }) %>
+    <% } %>
+  <% } %>
+
+  <!-- ---------- reviews ---------- -->
+  <% if (tab === 'reviews') { %>
+    <% if (reviews.length) { %>
+      <div class="panel">
+        <% reviews.forEach((r) => { %>
+          <div class="mini" style="align-items:flex-start">
+            <div>
+              <div class="t"><%= r.reviewer_name %> <span class="stars"><%= stars(r.rating) %></span></div>
+              <% if (r.item_title) { %>
+                <div class="s muted">about <%= r.item_title %></div>
+              <% } %>
+              <% if (r.comment) { %><p class="soft" style="margin:6px 0">&ldquo;<%= r.comment %>&rdquo;</p><% } %>
+              <div class="row" style="gap:6px">
+                <% json(r.tags, []).forEach((t) => { %><span class="badge"><%= t %></span><% }) %>
+              </div>
+            </div>
+            <div class="end s muted"><%= prettyDate(r.created_at.slice(0, 10)) %></div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <%- include('/partials/empty', {
+        heading: 'No reviews yet.',
+        text: 'Reviews can only be written after a completed rental or handover, so they build up slowly and honestly.' }) %>
+    <% } %>
+  <% } %>
+
+  <!-- ---------- report member ---------- -->
+  <% if (user && !isMe) { %>
+    <details class="report mt">
+      <summary>Report this member</summary>
+      <form method="post" action="/reports" class="panel mt" style="max-width:520px">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="user_id" value="<%= person.id %>">
+        <input type="hidden" name="back" value="/users/<%= person.id %>">
+        <div class="field">
+          <label for="reason">Reason</label>
+          <select id="reason" name="reason" required>
+            <option value="Fraud">Fraud</option>
+            <option value="Misleading Description">Misleading Description</option>
+            <option value="Inappropriate Content">Inappropriate Content</option>
+            <option value="Damaged Item">Damaged Item</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="description">What happened? <span class="muted">(optional)</span></label>
+          <textarea id="description" name="description" rows="3" style="min-height:76px"></textarea>
+        </div>
+        <button class="btn btn-quiet btn-sm" type="submit">Send report</button>
+      </form>
+    </details>
+  <% } %>
+</div>
+
+<%- include('/partials/foot') %>

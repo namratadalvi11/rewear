@@ -1,0 +1,135 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">The process, end to end</p>
+  <h1>How ReWear Works</h1>
+  <p class="lede">Renting a garment from a neighbour only works if both sides know exactly what
+    happens at each step. This is the whole flow.</p>
+</div>
+
+<!-- ---------- renting ---------- -->
+<section class="section-tight">
+  <div class="wrap">
+    <h2>Renting an outfit</h2>
+    <div class="grid grid-4 mt">
+      <div class="pillar"><div class="num">1</div><h3>Get verified</h3>
+        <p class="soft">One short form, approved by an admin. Verification is what lets members trust
+          handing clothes to each other.</p></div>
+      <div class="pillar"><div class="num">2</div><h3>Find and request</h3>
+        <p class="soft">Filter by category, occasion, size, locality and the dates you need. Send a
+          request with your dates and a short note.</p></div>
+      <div class="pillar"><div class="num">3</div><h3>Owner decides</h3>
+        <p class="soft">The owner accepts or declines. Accepting automatically declines other requests
+          for the same dates, so nothing is double-booked.</p></div>
+      <div class="pillar"><div class="num">4</div><h3>Condition record</h3>
+        <p class="soft">Before handover the owner photographs the item and notes any existing marks.
+          You confirm you agree once it is in your hands.</p></div>
+      <div class="pillar"><div class="num">5</div><h3>Wear it</h3>
+        <p class="soft">The rental runs for the dates you booked. A reminder appears on your dashboard
+          two days before it is due back.</p></div>
+      <div class="pillar"><div class="num">6</div><h3>Return</h3>
+        <p class="soft">Hand it back in the same locality. The owner records the return condition with
+          photos.</p></div>
+      <div class="pillar"><div class="num">7</div><h3>Confirm</h3>
+        <p class="soft">You confirm the return and the booking is marked complete. Deposit comes back
+          to you directly.</p></div>
+      <div class="pillar"><div class="num">8</div><h3>Review</h3>
+        <p class="soft">Both sides can now review each other. Only completed bookings can be reviewed.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- the condition record ---------- -->
+<section class="band">
+  <div class="wrap">
+    <div class="dash-grid">
+      <div>
+        <p class="eyebrow">The part that builds trust</p>
+        <h2>The condition record</h2>
+        <p class="soft">Most disputes over borrowed clothes come down to one question: was that mark
+          there before? ReWear answers it in writing, twice.</p>
+        <ul class="trust">
+          <li><span class="tick">&#10003;</span><span><strong>Before handover</strong> &mdash; the owner
+            records overall condition, visible marks, stains, tears, missing buttons, and which
+            accessories are included, with photos.</span></li>
+          <li><span class="tick">&#10003;</span><span><strong>The renter confirms</strong> the record
+            before the rental period starts. Nothing begins until both agree.</span></li>
+          <li><span class="tick">&#10003;</span><span><strong>On return</strong> &mdash; the owner
+            records the condition again: unchanged, minor damage, major damage, or a missing item.</span></li>
+          <li><span class="tick">&#10003;</span><span>Both records stay attached to the booking, so the
+            history is always there to look at.</span></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Booking timeline</h3>
+        <div class="timeline">
+          <% ['Listed','Booked','Handed Over','Rented','Returned','Completed'].forEach((s, i) => { %>
+            <div class="step <%= i < 4 ? 'done' : '' %> <%= i === 4 ? 'now' : '' %>">
+              <span class="dot" aria-hidden="true"></span><span class="l"><%= s %></span>
+            </div>
+          <% }) %>
+        </div>
+        <p class="hint">Every booking shows this timeline, so both members always know whose turn it is.</p>
+        <hr>
+        <h3>What ReWear does not do</h3>
+        <p class="soft" style="font-size:.9rem;margin:0">No payments, no delivery, no insurance.
+          Rent and deposit are settled directly between members, and handover is local and in person.
+          Keeping it simple is deliberate.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- resale and donation ---------- -->
+<section>
+  <div class="wrap">
+    <div class="grid grid-2">
+      <div class="panel">
+        <p class="eyebrow">Supporting module</p>
+        <h2 style="font-size:1.5rem">Reselling</h2>
+        <p class="soft">List an item with an asking price. Interested members send an enquiry through
+          the platform. When you accept, contact details are shared and you settle the sale between
+          yourselves. Mark it handed over and the listing closes.</p>
+        <a class="btn btn-quiet btn-sm" href="/resale">Visit the Resale Hub</a>
+      </div>
+      <div class="panel">
+        <p class="eyebrow">Supporting module</p>
+        <h2 style="font-size:1.5rem">Donating</h2>
+        <p class="soft">List wearable clothes with a preferred handover method. Members can request
+          them, or you can take part in a collection drive listed by an administrator. The same
+          accept-then-handover flow applies.</p>
+        <a class="btn btn-quiet btn-sm" href="/donate">Visit the Donation Hub</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- safety ---------- -->
+<section class="band">
+  <div class="wrap">
+    <div class="center" style="max-width:56ch;margin:0 auto 32px">
+      <p class="eyebrow">Trust &amp; safety</p>
+      <h2>What keeps this safe</h2>
+    </div>
+    <div class="grid grid-3">
+      <div class="pillar"><h3>Verified members only</h3>
+        <p class="soft">Browsing is open, but renting and listing need admin verification.</p></div>
+      <div class="pillar"><h3>Limited personal information</h3>
+        <p class="soft">Profiles show a name, locality and college. Phone numbers are shared only
+          after a booking is accepted, and addresses never.</p></div>
+      <div class="pillar"><h3>Reviews that mean something</h3>
+        <p class="soft">A review can only be written after a completed transaction, so ratings cannot
+          be manufactured.</p></div>
+      <div class="pillar"><h3>Before and after photos</h3>
+        <p class="soft">Condition is documented at both ends of every rental.</p></div>
+      <div class="pillar"><h3>Local handover</h3>
+        <p class="soft">Meetings happen in the listed locality, in a public place.</p></div>
+      <div class="pillar"><h3>Report anything</h3>
+        <p class="soft">Every listing and profile has a report option. Admins review reports and can
+          remove listings.</p></div>
+    </div>
+    <p class="center mt"><a class="btn" href="/browse">Start browsing</a></p>
+  </div>
+</section>
+
+<%- include('/partials/foot') %>

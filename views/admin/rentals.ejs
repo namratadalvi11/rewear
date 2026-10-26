@@ -1,0 +1,92 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head">
+  <p class="eyebrow">Administration</p>
+  <h1>Transactions</h1>
+  <p class="lede">Rental bookings, demo resale orders, and donation requests on the platform.</p>
+</div>
+
+<div class="wrap">
+  <%- include('/partials/admin-tabs') %>
+
+  <div class="panel mb">
+    <div class="panel-head"><h2 style="font-size:1.2rem">Rentals (<%= rentals.length %>)</h2></div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Item</th><th>Owner</th><th>Renter</th><th>Dates</th>
+            <th>Amount</th><th>Condition records</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <% if (!rentals.length) { %><tr><td colspan="8" class="muted">No rentals yet.</td></tr><% } %>
+          <% rentals.forEach((r) => { %>
+            <tr>
+              <td><%= r.id %></td>
+              <td><a href="/items/<%= r.item_id %>"><%= r.title %></a></td>
+              <td><a href="/users/<%= r.owner_id %>"><%= r.owner_name %></a></td>
+              <td><a href="/users/<%= r.renter_id %>"><%= r.renter_name %></a></td>
+              <td class="muted"><%= prettyDate(r.start_date) %> &ndash; <%= prettyDate(r.end_date) %></td>
+              <td><%= money(r.rental_price) %> + <%= money(r.security_deposit) %></td>
+              <td>
+                <span class="badge <%= r.condition_before ? 'badge-verified' : '' %>">before</span>
+                <span class="badge <%= r.condition_after ? 'badge-verified' : '' %>">after</span>
+              </td>
+              <td><span class="badge status status-<%= r.status %>"><%= r.status %></span></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel mb">
+    <div class="panel-head"><h2 style="font-size:1.2rem">Resale orders (<%= orders.length %>)</h2></div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>#</th><th>Item</th><th>Seller</th><th>Buyer</th><th>Amount</th><th>Payment</th><th>Status</th></tr></thead>
+        <tbody>
+          <% if (!orders.length) { %><tr><td colspan="7" class="muted">No resale orders yet.</td></tr><% } %>
+          <% orders.forEach((o) => { %>
+            <tr>
+              <td><a href="/orders/<%= o.id %>"><%= o.id %></a></td>
+              <td><a href="/items/<%= o.item_id %>"><%= o.title %></a></td>
+              <td><%= o.seller_name %></td>
+              <td><%= o.buyer_name %></td>
+              <td><%= money(o.sale_price) %></td>
+              <td><%= o.payment_mode === 'demo' ? 'Demo · not charged' : o.payment_mode %></td>
+              <td><span class="badge status status-<%= o.status %>"><%= o.status %></span></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2 style="font-size:1.2rem">Resale &amp; donation requests (<%= requests.length %>)</h2></div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Item</th><th>Kind</th><th>Owner</th><th>Requester</th>
+            <th>Sent</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <% if (!requests.length) { %><tr><td colspan="7" class="muted">No requests yet.</td></tr><% } %>
+          <% requests.forEach((q) => { %>
+            <tr>
+              <td><%= q.id %></td>
+              <td><a href="/items/<%= q.item_id %>"><%= q.title %></a></td>
+              <td><span class="badge"><%= q.kind %></span></td>
+              <td><a href="/users/<%= q.owner_id %>"><%= q.owner_name %></a></td>
+              <td><a href="/users/<%= q.requester_id %>"><%= q.requester_name %></a></td>
+              <td class="muted"><%= prettyDate(q.created_at.slice(0, 10)) %></td>
+              <td><span class="badge status status-<%= q.status %>"><%= q.status %></span></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

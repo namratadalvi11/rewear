@@ -1,0 +1,24 @@
+<%- include('/partials/head') %>
+
+<div class="wrap page-head collection-head">
+  <p class="eyebrow">Your saved pieces</p>
+  <h1>Wishlist</h1>
+  <p class="lede">Keep the pieces you love close while you decide what comes next.</p>
+</div>
+
+<div class="wrap wishlist-page">
+  <% if (items.length) { %>
+    <div class="grid grid-cards wishlist-grid">
+      <% items.forEach((item) => { %>
+        <%- include('/partials/item-card', { item, mode: item.listing_type }) %>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <%- include('/partials/empty', {
+      heading: 'Your wishlist is waiting.',
+      text: 'Save an item with the heart button and it will appear here.',
+      cta: 'Explore Collection', href: '/explore' }) %>
+  <% } %>
+</div>
+
+<%- include('/partials/foot') %>

@@ -1,0 +1,40 @@
+<%- include('/partials/head') %>
+
+<div class="wrap wrap-narrow page-head">
+  <p class="eyebrow">Welcome back</p>
+  <h1>Log in to ReWear</h1>
+</div>
+
+<div class="wrap wrap-narrow">
+  <div class="panel">
+    <% if (errors.length) { %>
+      <div class="errors" role="alert">
+        <ul><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul>
+      </div>
+    <% } %>
+
+    <form method="post" action="/login" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="<%= form.email || '' %>" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password">
+      </div>
+      <button class="btn btn-block" type="submit">Log in</button>
+      <p class="center mt link-quiet">New here? <a href="/register">Create an account</a></p>
+    </form>
+  </div>
+
+  <div class="panel panel-tight mt">
+    <p class="muted" style="margin:0;font-size:.85rem">
+      <strong>Demo accounts</strong> (from <code>npm run seed</code>):
+      <code>aarav@example.com</code> / <code>rewear123</code> &middot;
+      admin <code>admin@rewear.local</code> / <code>admin123</code>
+    </p>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

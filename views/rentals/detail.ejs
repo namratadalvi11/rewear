@@ -1,0 +1,336 @@
+<%- include('/partials/head') %>
+<%
+  // Which point of the journey this booking has reached.
+  const STEPS = ['Listed', 'Booked', 'Handed Over', 'Rented', 'Returned', 'Completed'];
+  const REACHED = { pending: 1, accepted: 2, active: 3, returned: 4, completed: 6,
+    rejected: 1, cancelled: 1 };
+  const done = REACHED[rental.status] || 1;
+  const stalled = ['rejected', 'cancelled'].includes(rental.status);
+  // Contact details are only useful, and only shared, once a booking is confirmed.
+  const shareContact = ['accepted', 'active', 'returned', 'completed'].includes(rental.status);
+  const other = isOwner
+    ? { name: rental.renter_name, id: rental.renter_id, phone: rental.renter_phone,
+        location: rental.renter_location, role: 'Renter' }
+    : { name: rental.owner_name, id: rental.owner_id, phone: rental.owner_phone,
+        location: rental.owner_location, role: 'Owner' };
+%>
+
+<div class="wrap page-head">
+  <p class="link-quiet">
+    <a href="<%= isOwner ? '/rentals/requests' : '/rentals' %>">&larr; Back to
+      <%= isOwner ? 'requests' : 'my rentals' %></a>
+  </p>
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Booking #<%= rental.id %> &middot; you are the <%= isOwner ? 'owner' : 'renter' %></p>
+      <h1 style="font-size:clamp(1.6rem,3vw,2.2rem)"><%= rental.title %></h1>
+    </div>
+    <span class="badge status status-<%= rental.status %>" style="font-size:.85rem;padding:7px 14px">
+      <%= rental.status %></span>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- ---------- timeline ---------- -->
+  <div class="panel mb">
+    <% if (stalled) { %>
+      <p class="soft" style="margin:0">This booking was <strong><%= rental.status %></strong>, so the
+        handover never took place.</p>
+    <% } else { %>
+      <div class="timeline">
+        <% STEPS.forEach((label, i) => { %>
+          <div class="step <%= i < done ? 'done' : '' %> <%= i === done ? 'now' : '' %>">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="l"><%= label %></span>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="dash-grid">
+    <!-- ---------- left column: actions ---------- -->
+    <div>
+      <!-- booking facts -->
+      <div class="panel mb">
+        <div class="panel-head"><h2 style="font-size:1.2rem">Booking details</h2></div>
+        <dl class="specs">
+          <div><dt>Item</dt><dd><a href="/items/<%= rental.item_id %>"><%= rental.title %></a></dd></div>
+          <div><dt>Size</dt><dd><%= rental.size %></dd></div>
+          <div><dt>From</dt><dd><%= prettyDate(rental.start_date) %></dd></div>
+          <div><dt>Until</dt><dd><%= prettyDate(rental.end_date) %></dd></div>
+          <div><dt>Rent (<%= rental.days %> day<%= rental.days === 1 ? '' : 's' %>)</dt>
+            <dd><%= money(rental.rental_price) %></dd></div>
+          <div><dt>Security deposit</dt><dd><%= money(rental.security_deposit) %> refundable</dd></div>
+          <div><dt>Handover locality</dt><dd><%= rental.item_location %></dd></div>
+          <% if (rental.accessories) { %>
+            <div><dt>Included</dt><dd><%= rental.accessories %></dd></div>
+          <% } %>
+        </dl>
+        <% if (rental.message) { %>
+          <p class="soft" style="margin-top:14px"><strong>Renter&rsquo;s note:</strong>
+            &ldquo;<%= rental.message %>&rdquo;</p>
+        <% } %>
+      </div>
+
+      <!-- ---------- step: owner records condition before handover ---------- -->
+      <% if (isOwner && rental.status === 'accepted' && !before) { %>
+        <div class="panel mb">
+          <div class="panel-head">
+            <h2 style="font-size:1.2rem">Record the condition before handover</h2>
+          </div>
+          <p class="soft">This protects you both. Photograph the item as it is now and note anything
+            already worn or marked.</p>
+          <form method="post" action="/rentals/<%= rental.id %>/handover" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="field">
+              <label for="damage">Overall condition</label>
+              <select id="damage" name="damage" required>
+                <% DAMAGE_LEVELS.forEach((d) => { %><option value="<%= d %>"><%= d %></option><% }) %>
+              </select>
+            </div>
+            <div class="field">
+              <label for="marks">Visible marks, stains, tears or missing buttons</label>
+              <textarea id="marks" name="marks" rows="2" style="min-height:70px"
+                        placeholder="e.g. small mark near the left cuff, one spare button missing"></textarea>
+            </div>
+            <div class="field">
+              <label for="accessories">Accessories handed over</label>
+              <input type="text" id="accessories" name="accessories"
+                     value="<%= rental.accessories || '' %>" placeholder="e.g. blouse, dupatta, garment bag">
+            </div>
+            <div class="field">
+              <label for="notes">Anything else</label>
+              <textarea id="notes" name="notes" rows="2" style="min-height:70px"></textarea>
+            </div>
+            <div class="field">
+              <label for="photos">Photos before handover <span class="muted">(up to 6)</span></label>
+              <input type="file" id="photos" name="photos" accept="image/*" multiple data-preview>
+              <div class="record-photos" id="preview"></div>
+            </div>
+            <button class="btn" type="submit">Save condition record</button>
+          </form>
+        </div>
+      <% } %>
+
+      <!-- ---------- step: renter confirms the handover ---------- -->
+      <% if (!isOwner && rental.status === 'accepted') { %>
+        <div class="panel mb">
+          <div class="panel-head"><h2 style="font-size:1.2rem">Confirm the handover</h2></div>
+          <% if (!before) { %>
+            <p class="soft" style="margin:0">Waiting for the owner to record the item condition.
+              You will be notified when it is ready to confirm.</p>
+          <% } else { %>
+            <p class="soft">Check the item against the record below. Confirm only once you have it
+              in hand and agree with what is written.</p>
+            <form method="post" action="/rentals/<%= rental.id %>/confirm-handover">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button class="btn" type="submit">I have the item &mdash; start the rental</button>
+            </form>
+          <% } %>
+        </div>
+      <% } %>
+
+      <!-- ---------- step: owner records the return ---------- -->
+      <% if (isOwner && rental.status === 'active') { %>
+        <div class="panel mb">
+          <div class="panel-head"><h2 style="font-size:1.2rem">Record the return condition</h2></div>
+          <p class="soft">Due back on <strong><%= prettyDate(rental.end_date) %></strong>.
+            Once you have the item, record how it came back.</p>
+          <form method="post" action="/rentals/<%= rental.id %>/return" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="field">
+              <label for="damage2">Condition on return</label>
+              <select id="damage2" name="damage" required>
+                <% DAMAGE_LEVELS.forEach((d) => { %><option value="<%= d %>"><%= d %></option><% }) %>
+              </select>
+            </div>
+            <div class="field">
+              <label for="marks2">New marks or damage, if any</label>
+              <textarea id="marks2" name="marks" rows="2" style="min-height:70px"></textarea>
+            </div>
+            <div class="field">
+              <label for="acc2">Accessories returned</label>
+              <input type="text" id="acc2" name="accessories" placeholder="e.g. blouse and dupatta returned">
+            </div>
+            <div class="field">
+              <label for="notes2">Notes</label>
+              <textarea id="notes2" name="notes" rows="2" style="min-height:70px"></textarea>
+            </div>
+            <div class="field">
+              <label for="photos2">Photos after return</label>
+              <input type="file" id="photos2" name="photos" accept="image/*" multiple>
+            </div>
+            <button class="btn" type="submit">Save return record</button>
+          </form>
+        </div>
+      <% } %>
+
+      <!-- ---------- step: renter confirms the return ---------- -->
+      <% if (!isOwner && rental.status === 'returned') { %>
+        <div class="panel mb">
+          <div class="panel-head"><h2 style="font-size:1.2rem">Confirm and close the booking</h2></div>
+          <p class="soft">The owner has recorded the return condition below. Confirm it to complete
+            the booking, then you can both leave a review.</p>
+          <form method="post" action="/rentals/<%= rental.id %>/complete">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn" type="submit">Confirm return &mdash; complete booking</button>
+          </form>
+        </div>
+      <% } %>
+
+      <!-- ---------- waiting states ---------- -->
+      <% if (isOwner && rental.status === 'returned') { %>
+        <div class="panel mb"><p class="soft" style="margin:0">Waiting for the renter to confirm the
+          return. Once they do, the booking is complete and you can review each other.</p></div>
+      <% } %>
+      <% if (isOwner && rental.status === 'accepted' && before && !rental.handover_confirmed) { %>
+        <div class="panel mb"><p class="soft" style="margin:0">Condition recorded. Waiting for the
+          renter to confirm the handover.</p></div>
+      <% } %>
+      <% if (!isOwner && rental.status === 'pending') { %>
+        <div class="panel mb"><p class="soft" style="margin:0">Your request has been sent. The owner
+          will accept or decline it.</p></div>
+      <% } %>
+      <% if (!isOwner && rental.status === 'active') { %>
+        <div class="panel mb"><p class="soft" style="margin:0">Rental in progress. Please return the
+          item by <strong><%= prettyDate(rental.end_date) %></strong>. The owner records the return
+          condition when they receive it.</p></div>
+      <% } %>
+
+      <!-- ---------- owner decisions on a pending request ---------- -->
+      <% if (isOwner && rental.status === 'pending') { %>
+        <div class="panel mb">
+          <div class="panel-head"><h2 style="font-size:1.2rem">Respond to this request</h2></div>
+          <div class="row">
+            <form method="post" action="/rentals/<%= rental.id %>/accept">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button class="btn" type="submit">Accept request</button>
+            </form>
+            <form method="post" action="/rentals/<%= rental.id %>/reject" data-confirm="Decline this request?">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button class="btn btn-quiet" type="submit">Reject</button>
+            </form>
+          </div>
+          <p class="hint">Accepting will automatically decline other requests for the same dates.</p>
+        </div>
+      <% } %>
+
+      <!-- ---------- condition records ---------- -->
+      <% if (before || after) { %>
+        <div class="panel mb">
+          <div class="panel-head"><h2 style="font-size:1.2rem">Condition records</h2></div>
+
+          <% [['Before handover', before], ['On return', after]].forEach(([label, rec]) => { %>
+            <% if (rec) { %>
+              <div class="record">
+                <div class="row row-between">
+                  <strong><%= label %></strong>
+                  <span class="badge <%= rec.damage === 'Condition unchanged' ? 'badge-verified' : 'badge-pending' %>">
+                    <%= rec.damage %></span>
+                </div>
+                <p class="muted" style="margin:6px 0 0;font-size:.82rem">
+                  Recorded by <%= rec.recorded_by %> on
+                  <%= prettyDate(rec.recorded_at.slice(0, 10)) %></p>
+                <% if (rec.marks) { %><p style="margin:8px 0 0"><strong>Marks:</strong>
+                  <span class="soft"><%= rec.marks %></span></p><% } %>
+                <% if (rec.accessories) { %><p style="margin:4px 0 0"><strong>Accessories:</strong>
+                  <span class="soft"><%= rec.accessories %></span></p><% } %>
+                <% if (rec.notes) { %><p style="margin:4px 0 0"><strong>Notes:</strong>
+                  <span class="soft"><%= rec.notes %></span></p><% } %>
+                <% if (rec.photos && rec.photos.length) { %>
+                  <div class="record-photos">
+                    <% rec.photos.forEach((p) => { %>
+                      <img src="<%= p %>" alt="<%= label %> photo" loading="lazy">
+                    <% }) %>
+                  </div>
+                <% } %>
+              </div>
+            <% } %>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <!-- ---------- review ---------- -->
+      <% if (rental.status === 'completed') { %>
+        <div class="panel mb">
+          <div class="panel-head"><h2 style="font-size:1.2rem">Review <%= other.name %></h2></div>
+          <% if (myReview) { %>
+            <p class="soft" style="margin:0">You have already reviewed this booking.
+              <a href="/reviews">See your reviews</a>.</p>
+          <% } else { %>
+            <form method="post" action="/reviews" data-stars>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="rental_id" value="<%= rental.id %>">
+              <div class="field">
+                <label>Rating</label>
+                <div class="chips">
+                  <% [1,2,3,4,5].forEach((n) => { %>
+                    <label class="chip"><input type="radio" name="rating" value="<%= n %>"
+                      <%= n === 5 ? 'checked' : '' %> required> <%= n %></label>
+                  <% }) %>
+                  <span class="stars stars-out">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                </div>
+              </div>
+              <div class="field">
+                <label>What went well? <span class="muted">(optional)</span></label>
+                <div class="chips">
+                  <% REVIEW_TAGS.forEach((t) => { %>
+                    <label class="chip"><input type="checkbox" name="tags" value="<%= t %>"> <%= t %></label>
+                  <% }) %>
+                </div>
+              </div>
+              <div class="field">
+                <label for="comment">Comment</label>
+                <textarea id="comment" name="comment" rows="3" style="min-height:80px"
+                          placeholder="Was the item as described? Was handover smooth?"></textarea>
+              </div>
+              <button class="btn" type="submit">Submit review</button>
+            </form>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- ---------- right column: the other member ---------- -->
+    <div>
+      <div class="panel mb">
+        <div class="panel-head"><h3 style="margin:0"><%= other.role %></h3></div>
+        <p style="margin:0 0 4px"><a href="/users/<%= other.id %>"><strong><%= other.name %></strong></a></p>
+        <p class="muted" style="font-size:.88rem"><%= other.location %></p>
+        <% if (shareContact) { %>
+          <p style="margin:12px 0 0"><strong>Phone:</strong> <%= other.phone %></p>
+          <p class="hint">Shared because this booking is confirmed. Please use it only to arrange
+            the handover.</p>
+        <% } else { %>
+          <p class="hint" style="margin-bottom:0">Contact details are shared once the booking is
+            accepted.</p>
+        <% } %>
+      </div>
+
+      <% if (['pending', 'accepted'].includes(rental.status)) { %>
+        <div class="panel mb">
+          <h3>Need to cancel?</h3>
+          <p class="soft" style="font-size:.9rem">Cancelling frees the dates for other members.</p>
+          <form method="post" action="/rentals/<%= rental.id %>/cancel"
+                data-confirm="Cancel this booking?">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-quiet btn-sm" type="submit">Cancel booking</button>
+          </form>
+        </div>
+      <% } %>
+
+      <div class="panel">
+        <h3>Handover checklist</h3>
+        <ul class="trust">
+          <li><span class="tick">1</span><span>Meet in a public place in the listed locality.</span></li>
+          <li><span class="tick">2</span><span>Check the item against the condition record together.</span></li>
+          <li><span class="tick">3</span><span>Settle rent and deposit directly between yourselves.</span></li>
+          <li><span class="tick">4</span><span>Return on the agreed date, then confirm here.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('/partials/foot') %>

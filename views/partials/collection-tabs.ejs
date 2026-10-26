@@ -1,0 +1,18 @@
+<%
+  const tabQuery = new URLSearchParams();
+  const preservedFilters = ['q', 'category', 'gender', 'occasion', 'size', 'condition',
+    'location', 'min_price', 'max_price', 'from', 'to', 'sort'];
+  preservedFilters.forEach((key) => {
+    if (query && query[key]) tabQuery.set(key, query[key]);
+  });
+  const tabHref = (path) => {
+    const params = tabQuery.toString();
+    return path + (params ? '?' + params : '');
+  };
+%>
+<nav class="collection-tabs" aria-label="Collection type">
+  <a href="<%= tabHref('/explore') %>" class="<%= mode === 'all' ? 'on' : '' %>" <% if (mode === 'all') { %>aria-current="page"<% } %>>All</a>
+  <a href="<%= tabHref('/browse') %>" class="<%= mode === 'rent' ? 'on' : '' %>" <% if (mode === 'rent') { %>aria-current="page"<% } %>>Rent</a>
+  <a href="<%= tabHref('/resale') %>" class="<%= mode === 'sell' ? 'on' : '' %>" <% if (mode === 'sell') { %>aria-current="page"<% } %>>Buy Pre-Loved</a>
+  <a href="<%= tabHref('/donate') %>" class="<%= mode === 'donate' ? 'on' : '' %>" <% if (mode === 'donate') { %>aria-current="page"<% } %>>Donate</a>
+</nav>

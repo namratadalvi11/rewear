@@ -1,0 +1,64 @@
+<%- include('/partials/head') %>
+
+<div class="wrap wrap-narrow page-head">
+  <p class="eyebrow">Trust &amp; safety</p>
+  <h1>Community Verification</h1>
+  <p class="lede">ReWear is deliberately a small-community platform. Verification is a light check by
+    an admin &mdash; there is no document upload and no KYC.</p>
+</div>
+
+<div class="wrap wrap-narrow">
+  <div class="panel mb">
+    <h3>Current status</h3>
+    <p>
+      <% if (user.verification === 'verified') { %>
+        <span class="badge badge-verified">&#10003; Verified</span>
+        You can rent, list and request items.
+      <% } else if (user.verification === 'pending') { %>
+        <span class="badge badge-pending">Pending</span>
+        An admin will review your request shortly.
+      <% } else { %>
+        <span class="badge">Not verified</span>
+        You can browse, but renting and listing need verification.
+      <% } %>
+    </p>
+  </div>
+
+  <div class="panel mb">
+    <h3>What an admin checks</h3>
+    <ul class="trust">
+      <li><span class="tick">&#10003;</span><span>Your name, locality and phone number are filled in
+        and look genuine.</span></li>
+      <li><span class="tick">&#10003;</span><span>Your college or organisation, if you added one.</span></li>
+      <li><span class="tick">&#10003;</span><span>That you have agreed to the community guidelines below.</span></li>
+    </ul>
+    <p class="hint">Your details stay private. Only your name, locality, college and reviews are
+      shown on your public profile.</p>
+  </div>
+
+  <% if (user.verification !== 'verified') { %>
+    <div class="panel">
+      <h3>Community guidelines</h3>
+      <ol class="soft" style="padding-left:20px">
+        <li>Describe items honestly, including marks and wear.</li>
+        <li>Meet in a public place in the listed locality for handover.</li>
+        <li>Check and agree the condition record with the other member.</li>
+        <li>Return items on the agreed date, cleaned and complete.</li>
+        <li>Keep other members&rsquo; contact details private.</li>
+      </ol>
+
+      <form method="post" action="/profile/verify">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="check">
+          <input type="checkbox" id="agree" name="agree" value="1" required>
+          <label for="agree">I confirm my profile details are correct and I agree to the community
+            guidelines.</label>
+        </div>
+        <button class="btn" type="submit">Request verification</button>
+        <p class="hint">Make sure your <a href="/profile">profile details</a> are filled in first.</p>
+      </form>
+    </div>
+  <% } %>
+</div>
+
+<%- include('/partials/foot') %>

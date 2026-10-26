@@ -1,0 +1,9 @@
+<%# Empty state. Locals: heading, text, cta (optional label), href (optional) %>
+<div class="empty">
+  <div class="mark" aria-hidden="true">&#9671;</div>
+  <h3><%= heading %></h3>
+  <p><%= text %></p>
+  <% if (typeof cta !== 'undefined' && cta) { %>
+    <a class="btn" href="<%= href %>"><%= cta %></a>
+  <% } %>
+</div>

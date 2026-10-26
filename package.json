@@ -1,0 +1,23 @@
+{
+  "name": "rewear",
+  "version": "1.0.0",
+  "description": "ReWear - a community clothing rental, resale and donation platform (CEP project)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file=.env server.js",
+    "dev": "node --watch --env-file=.env server.js",
+    "seed": "node --env-file=.env seed.js",
+    "smoke": "node smoke.js",
+    "api-smoke": "node api-smoke.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "multer": "^2.4.0"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

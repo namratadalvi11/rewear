@@ -1,0 +1,424 @@
+<%- include('/partials/head') %>
+<%
+  const images = itemImages(item);
+  const m = json(item.measurements, {});
+  const hasMeasurements = Object.values(m).some((v) => v);
+  const isRent = item.listing_type === 'rent';
+  const canAct = user && user.verification === 'verified' && !isOwner && item.status === 'active';
+%>
+
+<div class="wrap" style="padding-top:28px">
+  <p class="link-quiet">
+    <a href="<%= isRent ? '/browse' : (item.listing_type === 'sell' ? '/resale' : '/donate') %>">
+      &larr; Back to <%= isRent ? 'rentals' : (item.listing_type === 'sell' ? 'resale hub' : 'donation hub') %>
+    </a>
+  </p>
+</div>
+
+<div class="wrap detail product-detail" style="padding-bottom:20px">
+
+  <div class="product-gallery-column">
+    <div class="gallery-layout <%= images.length > 1 ? 'has-thumbs' : '' %>">
+      <% if (images.length > 1) { %>
+        <div class="gallery-thumbs" aria-label="More item images">
+          <% images.forEach((src, i) => { %>
+            <button type="button" class="<%= i === 0 ? 'on' : '' %>" data-src="<%= src %>" aria-label="Show image <%= i + 1 %> of <%= images.length %>">
+              <img src="<%= src %>" alt="">
+            </button>
+          <% }) %>
+        </div>
+      <% } %>
+      <div class="gallery-main">
+        <img src="<%= images[0] %>" alt="<%= item.title %>" width="400" height="500">
+        <% if (images.length > 1) { %>
+          <button class="gallery-control gallery-previous" type="button" data-gallery-step="-1" aria-label="Previous image">&lsaquo;</button>
+          <button class="gallery-control gallery-next" type="button" data-gallery-step="1" aria-label="Next image">&rsaquo;</button>
+          <span class="gallery-count" aria-live="polite">1 / <%= images.length %></span>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="product-info-column">
+    <div class="product-title-line">
+      <h1 class="product-title"><%= item.title %></h1>
+      <% const saved = user && wishlistIds.includes(Number(item.id)); %>
+      <% if (user) { %>
+        <form class="wishlist-detail-form" method="post"
+              action="/wishlist/<%= item.id %>/<%= saved ? 'remove' : 'add' %>">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="back" value="/items/<%= item.id %>">
+          <button class="wishlist-button <%= saved ? 'saved' : '' %>" type="submit"
+                  aria-label="<%= saved ? 'Remove from' : 'Add to' %> wishlist: <%= item.title %>"
+                  aria-pressed="<%= saved ? 'true' : 'false' %>">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.5-8.8 11-8.8 11s-8.8-5.5-8.8-11A4.8 4.8 0 0 1 12 6.3a4.8 4.8 0 0 1 8.8 2.5Z"></path></svg>
+          </button>
+        </form>
+      <% } else { %>
+        <a class="wishlist-button wishlist-detail-form" href="/login"
+           aria-label="Log in to add <%= item.title %> to your wishlist">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.5-8.8 11-8.8 11s-8.8-5.5-8.8-11A4.8 4.8 0 0 1 12 6.3a4.8 4.8 0 0 1 8.8 2.5Z"></path></svg>
+        </a>
+      <% } %>
+    </div>
+    <div class="row mb">
+      <span class="badge badge-ink"><%= item.listing_type === 'rent' ? 'For rent'
+        : (item.listing_type === 'sell' ? 'For sale' : 'Donation') %></span>
+      <span class="badge"><%= item.category %></span>
+      <span class="badge"><%= item.condition %></span>
+      <% if (item.status !== 'active') { %>
+        <span class="badge badge-danger status status-<%= item.status %>"><%= item.status %></span>
+      <% } %>
+    </div>
+    <div class="product-rating">
+      <% if (ownerStats.rating) { %>
+        <span class="stars" aria-label="<%= ownerStats.rating %> out of 5 stars"><%= stars(ownerStats.rating) %></span>
+        <span><%= ownerStats.rating %> <span class="muted">(<%= ownerStats.review_count %> owner reviews)</span></span>
+      <% } else { %>
+        <span class="muted">No owner reviews yet</span>
+      <% } %>
+    </div>
+
+    <div class="price-box">
+      <% if (isRent) { %>
+        <div class="big"><%= money(item.rental_price) %> <span style="font-size:.9rem;font-family:var(--sans);color:var(--ink-faint)">per day</span></div>
+        <p class="muted" style="margin:8px 0 0;font-size:.88rem">
+          + <%= money(item.security_deposit) %> refundable security deposit
+        </p>
+        <% if (item.available_from || item.available_to) { %>
+          <p class="muted" style="margin:6px 0 0;font-size:.88rem">
+            Owner has listed it as available
+            <% if (item.available_from) { %>from <%= prettyDate(item.available_from) %><% } %>
+            <% if (item.available_to) { %>until <%= prettyDate(item.available_to) %><% } %>
+          </p>
+        <% } %>
+      <% } else if (item.listing_type === 'sell') { %>
+        <div class="big"><%= money(item.sale_price) %></div>
+        <% if (item.original_price > item.sale_price) { %>
+          <p class="muted" style="margin:8px 0 0;font-size:.88rem">
+            Original price: <s><%= money(item.original_price) %></s>
+          </p>
+        <% } %>
+        <p class="muted" style="margin:8px 0 0;font-size:.88rem">Price set by the seller. Payment and
+          handover are arranged directly between members. Demo orders do not collect payment.</p>
+      <% } else { %>
+        <div class="big">Free</div>
+        <p class="muted" style="margin:8px 0 0;font-size:.88rem">
+          Offered as a donation. <%= item.quantity %> garment<%= item.quantity === 1 ? '' : 's' %> available.
+          <% if (item.handover_method) { %>Handover: <%= item.handover_method %><% } %>
+        </p>
+      <% } %>
+    </div>
+
+    <!-- ---------- action: request rental / contact ---------- -->
+    <% if (isOwner) { %>
+      <div class="panel mb">
+        <h3>This is your listing</h3>
+        <div class="row">
+          <a class="btn btn-quiet btn-sm" href="/items/<%= item.id %>/edit">Edit</a>
+          <% if (isRent) { %>
+            <a class="btn btn-quiet btn-sm" href="/rentals/requests">View requests</a>
+          <% } else { %>
+            <a class="btn btn-quiet btn-sm" href="/requests">View enquiries</a>
+          <% } %>
+          <form method="post" action="/items/<%= item.id %>/status">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="back" value="/items/<%= item.id %>">
+            <input type="hidden" name="status" value="<%= item.status === 'paused' ? 'active' : 'paused' %>">
+            <button class="btn btn-quiet btn-sm" type="submit">
+              <%= item.status === 'paused' ? 'Resume listing' : 'Pause listing' %>
+            </button>
+          </form>
+        </div>
+        <p class="muted mt" style="font-size:.85rem;margin-bottom:0"><%= item.views %> views</p>
+      </div>
+
+    <% } else if (!user) { %>
+      <div class="panel mb">
+        <h3><%= isRent ? 'Log in to request this item' : 'Log in to contact the owner' %></h3>
+        <p class="soft">ReWear is a closed community platform, so requests only come from members.</p>
+        <div class="row">
+          <a class="btn" href="/login">Log in</a>
+          <a class="btn btn-ghost" href="/register">Join ReWear</a>
+        </div>
+      </div>
+
+    <% } else if (user.verification !== 'verified') { %>
+      <div class="panel mb">
+        <h3>Verification needed</h3>
+        <p class="soft">Community verification keeps handovers safe for both sides. It takes one form.</p>
+        <a class="btn" href="/profile/verify">Get verified</a>
+      </div>
+
+    <% } else if (item.status !== 'active') { %>
+      <div class="panel mb">
+        <h3>Not available right now</h3>
+        <p class="soft">This listing is currently marked <strong><%= item.status %></strong>.
+          Try browsing similar items.</p>
+        <a class="btn btn-ghost" href="/browse?category=<%= encodeURIComponent(item.category) %>">
+          See similar <%= item.category.toLowerCase() %></a>
+      </div>
+
+    <% } else if (isRent) { %>
+      <div class="panel mb">
+        <h3>Select your rental dates</h3>
+        <form method="post" action="/rentals/request">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="item_id" value="<%= item.id %>">
+          <div class="form-grid">
+            <div class="field">
+              <label for="start_date">From</label>
+              <input type="date" id="start_date" name="start_date" required data-start
+                     min="<%= item.available_from && item.available_from > today ? item.available_from : today %>"
+                     <% if (item.available_to) { %>max="<%= item.available_to %>"<% } %>>
+            </div>
+            <div class="field">
+              <label for="end_date">Until</label>
+              <input type="date" id="end_date" name="end_date" required data-end
+                     min="<%= item.available_from && item.available_from > today ? item.available_from : today %>"
+                     <% if (item.available_to) { %>max="<%= item.available_to %>"<% } %>>
+            </div>
+          </div>
+          <p class="hint" id="date-total" data-per-day="<%= item.rental_price %>"
+             data-deposit="<%= item.security_deposit %>">
+            Choose dates to see the total.
+          </p>
+          <div class="field">
+            <label for="message">Message to the owner <span class="muted">(optional)</span></label>
+            <textarea id="message" name="message" rows="3" style="min-height:76px"
+                      placeholder="What the outfit is for, and when you could collect it."></textarea>
+          </div>
+          <button class="btn btn-block" type="submit">Request Rental</button>
+          <button class="btn btn-quiet btn-block" type="submit" formaction="/cart/add">
+            Add to rental cart
+          </button>
+          <p class="hint center">The owner accepts or declines. Nothing is charged through ReWear.</p>
+        </form>
+
+        <% if (booked.length) { %>
+          <h3 style="margin-top:18px;font-size:.95rem">Already booked</h3>
+          <ul class="booked-list">
+            <% booked.forEach((b) => { %>
+              <li><%= prettyDate(b.start_date) %> &ndash; <%= prettyDate(b.end_date) %></li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+
+    <% } else { %>
+      <div class="panel mb">
+        <% if (item.listing_type === 'sell') { %>
+          <h3>Place a demo-mode order</h3>
+          <p class="hint">No payment is collected. Arrange payment and local handover directly with the seller.</p>
+          <form method="post" action="/orders" data-confirm="Place this demo order? No payment will be collected.">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="item_id" value="<%= item.id %>">
+            <button class="btn btn-block" type="submit">Place order · <%= money(item.sale_price) %></button>
+          </form>
+          <h3 style="margin-top:18px;font-size:1rem">Ask the seller a question</h3>
+        <% } else { %>
+          <h3>Request this donation</h3>
+          <p class="hint"><%= item.quantity %> garment<%= item.quantity === 1 ? '' : 's' %> available.</p>
+        <% } %>
+        <form method="post" action="/requests">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="item_id" value="<%= item.id %>">
+          <% if (item.listing_type === 'donate') { %>
+            <div class="form-grid">
+              <div class="field">
+                <label for="quantity">Quantity requested</label>
+                <input type="number" id="quantity" name="quantity" min="1" max="<%= item.quantity %>"
+                       value="1" required>
+              </div>
+              <div class="field">
+                <label for="handover_method">Collection method</label>
+                <select id="handover_method" name="handover_method" required>
+                  <% DONATION_HANDOVER_METHODS.forEach((method) => { %>
+                    <option value="<%= method %>"><%= method %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="field">
+                <label for="pickup_date">Preferred date</label>
+                <input type="date" id="pickup_date" name="pickup_date" min="<%= today %>" required>
+              </div>
+              <div class="field">
+                <label for="time_slot">Preferred time</label>
+                <select id="time_slot" name="time_slot" required>
+                  <% DONATION_TIME_SLOTS.forEach((slot) => { %>
+                    <option value="<%= slot %>"><%= slot %></option>
+                  <% }) %>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="pickup_location">Pickup / drop-off locality</label>
+              <input type="text" id="pickup_location" name="pickup_location" maxlength="120"
+                     required placeholder="Locality only, not a full address">
+              <p class="hint">Share a full address privately after the donor accepts.</p>
+            </div>
+          <% } %>
+          <div class="field">
+            <label for="message">Your message</label>
+            <textarea id="message" name="message" rows="3" style="min-height:86px"
+                      placeholder="<%= item.listing_type === 'sell' ? 'Ask about fit, condition or handover.' : 'Say briefly who it is for and how you could collect it.' %>"></textarea>
+          </div>
+          <button class="btn btn-block" type="submit">
+            <%= item.listing_type === 'sell' ? 'Send Enquiry' : 'Request Item' %>
+          </button>
+          <p class="hint center">Contact details are shared only after the owner accepts.</p>
+        </form>
+      </div>
+    <% } %>
+  </div>
+
+  <aside class="product-trust-column">
+    <div class="panel owner-panel mb">
+      <div class="owner-box">
+        <% if (item.profile_image) { %>
+          <img class="avatar" src="<%= item.profile_image %>" alt="">
+        <% } else { %>
+          <span class="avatar avatar-fallback" aria-hidden="true"><%= item.owner_name.charAt(0).toUpperCase() %></span>
+        <% } %>
+        <div>
+          <a href="/users/<%= item.owner_id %>"><strong><%= item.owner_name %></strong></a>
+          <% if (item.verification === 'verified') { %>
+            <span class="badge badge-verified">&#10003; Verified</span>
+          <% } %>
+          <div class="muted" style="font-size:.85rem">
+            <%= item.owner_location %><% if (item.college) { %> &middot; <%= item.college %><% } %>
+          </div>
+          <div style="font-size:.85rem">
+            <% if (ownerStats.rating) { %>
+              <span class="stars"><%= stars(ownerStats.rating) %></span>
+              <span class="muted"><%= ownerStats.rating %> (<%= ownerStats.review_count %>)</span>
+            <% } else { %>
+              <span class="muted">No reviews yet</span>
+            <% } %>
+            &middot; <span class="muted"><%= ownerStats.completed %> completed rentals</span>
+          </div>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:12px;margin-bottom:0">Approximate locality only. Phone number
+        and address are never shown publicly.</p>
+    </div>
+
+    <!-- ---------- trust ---------- -->
+    <div class="panel trust-panel mb">
+      <h3>Why this is safer than a stranger sale</h3>
+      <ul class="trust">
+        <li><span class="tick">&#10003;</span>
+          <span><strong>Verified community member</strong> &mdash;
+            <%= item.verification === 'verified' ? 'this owner has been verified by an admin.'
+              : 'verification pending for this owner.' %></span></li>
+        <li><span class="tick">&#10003;</span>
+          <span><strong>Condition documented</strong> &mdash; photos and notes are recorded before
+            handover and again on return.</span></li>
+        <li><span class="tick">&#10003;</span>
+          <span><strong>Transaction reviews</strong> &mdash; reviews can only be written after a
+            completed booking.</span></li>
+      </ul>
+
+      <% if (user && !isOwner) { %>
+        <details class="report">
+          <summary>Report this listing</summary>
+          <form method="post" action="/reports" style="margin-top:12px">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="item_id" value="<%= item.id %>">
+            <input type="hidden" name="user_id" value="<%= item.owner_id %>">
+            <input type="hidden" name="back" value="/items/<%= item.id %>">
+            <div class="field">
+              <label for="reason">Reason</label>
+              <select id="reason" name="reason" required>
+                <% REPORT_REASONS.forEach((r) => { %><option value="<%= r %>"><%= r %></option><% }) %>
+              </select>
+            </div>
+            <div class="field">
+              <label for="rdesc">What is wrong? <span class="muted">(optional)</span></label>
+              <textarea id="rdesc" name="description" rows="2" style="min-height:64px"></textarea>
+            </div>
+            <button class="btn btn-quiet btn-sm" type="submit">Send report</button>
+          </form>
+        </details>
+      <% } %>
+    </div>
+  </aside>
+</div>
+
+<section class="section-tight">
+  <div class="wrap">
+    <div class="panel product-description">
+      <h2>About this item</h2>
+      <p class="soft" style="white-space:pre-line"><%= item.description %></p>
+      <% if (item.accessories) { %>
+        <p><strong>Included with the item:</strong> <span class="soft"><%= item.accessories %></span></p>
+      <% } %>
+      <h3>Details</h3>
+      <dl class="specs">
+        <% if (item.brand) { %><div><dt>Brand</dt><dd><%= item.brand %></dd></div><% } %>
+        <div><dt>Category</dt><dd><%= item.category %></dd></div>
+        <div><dt>For</dt><dd><%= item.gender %></dd></div>
+        <div><dt>Size</dt><dd><%= item.size %></dd></div>
+        <% if (item.listing_type === 'donate') { %><div><dt>Quantity available</dt><dd><%= item.quantity %></dd></div><% } %>
+        <div><dt>Condition</dt><dd><%= item.condition %></dd></div>
+        <% if (item.occasion) { %><div><dt>Occasion</dt><dd><%= item.occasion %></dd></div><% } %>
+        <div><dt>Locality</dt><dd><%= item.location %></dd></div>
+      </dl>
+      <% if (hasMeasurements) { %>
+        <h3 class="measurements-title">Actual measurements</h3>
+        <p class="hint">Measured by the owner, in inches unless noted.</p>
+        <dl class="specs">
+          <% [['chest','Chest'],['waist','Waist'],['length','Length'],['shoulder','Shoulder'],
+              ['sleeve','Sleeve'],['other','Other']].forEach(([k, label]) => { %>
+            <% if (m[k]) { %><div><dt><%= label %></dt><dd><%= m[k] %></dd></div><% } %>
+          <% }) %>
+        </dl>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<% if (similarItems.length) { %>
+  <section class="section-tight similar-section">
+    <div class="wrap">
+      <div class="panel-head">
+        <h2>Similar Items</h2>
+        <a class="link-quiet" href="/browse?category=<%= encodeURIComponent(item.category) %>">View all &rarr;</a>
+      </div>
+      <div class="grid grid-cards">
+        <% similarItems.forEach((similar) => { %>
+          <%- include('/partials/item-card', { item: similar, mode: similar.listing_type }) %>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+<% } %>
+
+<!-- ---------- reviews for this item ---------- -->
+<section class="section-tight">
+  <div class="wrap">
+    <div class="panel">
+      <div class="panel-head"><h2 style="font-size:1.4rem">Reviews for this item</h2></div>
+      <% if (reviews.length) { %>
+        <% reviews.forEach((r) => { %>
+          <div class="mini" style="align-items:flex-start">
+            <div>
+              <div class="t"><%= r.reviewer_name %>
+                <span class="stars"><%= stars(r.rating) %></span></div>
+              <% if (r.comment) { %><p class="soft" style="margin:4px 0 6px"><%= r.comment %></p><% } %>
+              <div class="row" style="gap:6px">
+                <% json(r.tags, []).forEach((t) => { %><span class="badge"><%= t %></span><% }) %>
+              </div>
+            </div>
+            <div class="end s muted"><%= prettyDate(r.created_at.slice(0, 10)) %></div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p class="muted" style="margin:0">No reviews for this item yet. Reviews appear here once a
+          booking has been completed.</p>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<%- include('/partials/foot') %>

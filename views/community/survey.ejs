@@ -1,0 +1,52 @@
+<%- include('/partials/head') %>
+
+<div class="wrap wrap-narrow page-head">
+  <p class="eyebrow">Community Engagement</p>
+  <h1>Community Survey</h1>
+  <p class="lede">Seven quick questions about how people in this community buy, wear and pass on
+    occasion clothing. Responses are stored anonymously and shown only as totals.</p>
+</div>
+
+<div class="wrap wrap-narrow">
+  <% if (done) { %>
+    <div class="panel center">
+      <h2 style="font-size:1.4rem">Thank you.</h2>
+      <p class="soft">Your response has been recorded. Aggregate results help shape what ReWear
+        builds next.</p>
+      <div class="row" style="justify-content:center">
+        <a class="btn" href="/community">See community impact</a>
+        <a class="btn btn-quiet" href="/browse">Browse clothes</a>
+      </div>
+    </div>
+  <% } else { %>
+    <form method="post" action="/community/survey" class="panel">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <% questions.forEach((q, i) => { %>
+        <fieldset>
+          <legend>Question <%= i + 1 %></legend>
+          <p style="font-weight:600;margin-bottom:12px"><%= q.text %></p>
+          <div class="chips">
+            <% q.options.forEach((opt) => { %>
+              <label class="chip">
+                <input type="radio" name="<%= q.id %>" value="<%= opt %>" required> <%= opt %>
+              </label>
+            <% }) %>
+          </div>
+        </fieldset>
+      <% }) %>
+
+      <div class="field">
+        <label for="comment">Anything else you would want from a clothes-sharing platform?
+          <span class="muted">(optional)</span></label>
+        <textarea id="comment" name="comment" rows="3" style="min-height:80px" maxlength="500"></textarea>
+      </div>
+
+      <button class="btn btn-block" type="submit">Submit response</button>
+      <p class="hint center">No name or email is stored with your answers.
+        <% if (!user) { %>You do not need an account to respond.<% } %></p>
+    </form>
+  <% } %>
+</div>
+
+<%- include('/partials/foot') %>
